@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Prata&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: Outfit, var(--font-manrope), system-ui, sans-serif;
+}
+
+.prata-regular {
+  font-family: "Prata", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+a.active hr {
+  display: block;
+}
+
+.hero-full {
+  height: 100vh;
+}
+
+.hero-slide {
+  background-size: cover;
+  background-position: center;
+}
+
+.hero-kenburns {
+  will-change: transform;
+  animation: kenburns 7s ease-out forwards;
+}
+
+@keyframes kenburns {
+  from { scale: 1.08; }
+  to   { scale: 1; }
+}
+
+@media (max-width: 640px) {
+  a.active {
+    background-color: #000000;
+    color: #ffffff;
+  }
+}
