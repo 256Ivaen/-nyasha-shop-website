@@ -1,36 +1,48 @@
 'use client'
 
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { ShopContext } from '@/contexts/ShopContext'
 import ProductItem from '@/components/ProductItem'
-import type { Product } from '@/contexts/ShopContext'
+import { useCurrency } from '@/contexts/CurrencyContext'
+import axios from 'axios'
+
+interface Product {
+  _id: string
+  id?: string | number
+  name: string
+  price: number
+  image: string[]
+  category: string
+  bestseller?: boolean
+}
+
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
 
 export default function SearchResults() {
-  const params = useSearchParams()
-  const query = params.get('q') ?? ''
-  const ctx = useContext(ShopContext)!
-  const { products } = ctx
+  const params   = useSearchParams()
+  const query    = params.get('q') ?? ''
+  const { currency } = useCurrency()
+
   const [results, setResults] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!query.trim() || !products.length) { setLoading(false); return }
+    if (!query.trim()) { setResults([]); return }
     setLoading(true)
-    const term = query.toLowerCase().trim()
-    const found = products.filter(p =>
-      p.name.toLowerCase().includes(term) ||
-      p.description?.toLowerCase().includes(term) ||
-      p.category?.toLowerCase().includes(term)
-    )
-    found.sort((a, b) => {
-      const aMatch = a.name.toLowerCase().includes(term) ? 1 : 0
-      const bMatch = b.name.toLowerCase().includes(term) ? 1 : 0
-      return bMatch - aMatch
+    const token = typeof window !== 'undefined' ? localStorage.getItem('sn_device_token') ?? '' : ''
+    axios.get(`${BACKEND}/api/v1/products/search`, {
+      params: { q: query },
+      headers: { 'X-Currency': currency, 'X-Device-Token': token },
     })
-    setResults(found)
-    setLoading(false)
-  }, [query, products])
+      .then(r => {
+        const mapped = (r.data.products ?? []).map((p: Product) => ({
+          ...p, _id: String(p._id ?? p.id ?? ''),
+        }))
+        setResults(mapped)
+      })
+      .catch(() => setResults([]))
+      .finally(() => setLoading(false))
+  }, [query, currency])
 
   return (
     <div className="pt-10 pb-16">
@@ -50,7 +62,7 @@ export default function SearchResults() {
       ) : results.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {results.map(p => (
-            <ProductItem key={p._id} id={p._id} image={p.image} name={p.name} price={p.price} />
+            <ProductItem key={p._id} id={p._id} image={p.image} name={p.name} price={p.price} bestseller={p.bestseller} />
           ))}
         </div>
       ) : (

@@ -67,7 +67,7 @@ export function useShop() {
 }
 
 export default function ShopContextProvider({ children }: { children: ReactNode }) {
-  const currency = 'UGX '
+  const [currency, setCurrencyLocal] = useState('GBP')
   const delivery_fee = 5000
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
   const [search, setSearch] = useState('')
@@ -142,7 +142,11 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
 
   const getProductsData = async () => {
     try {
-      const res = await axios.get(backendUrl + '/api/list-products.php')
+      const deviceToken = typeof window !== 'undefined' ? localStorage.getItem('sn_device_token') ?? '' : ''
+      const currency    = typeof window !== 'undefined' ? localStorage.getItem('sn_preferred_currency') ?? 'GBP' : 'GBP'
+      const res = await axios.get(backendUrl + '/api/v1/products', {
+        headers: { 'X-Currency': currency, 'X-Device-Token': deviceToken },
+      })
       if (res.data.success) {
         const mapped = res.data.products.map((p: Product & { id?: string }) => ({ ...p, _id: String(p.id ?? p._id) })).reverse()
         setProducts(mapped)
@@ -257,7 +261,21 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   }
 
   useEffect(() => {
+    // Read persisted currency on first load
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sn_preferred_currency')
+      if (saved) setCurrencyLocal(saved)
+    }
     getProductsData()
+
+    // Re-fetch products whenever the user changes currency
+    const handleCurrencyChange = (e: Event) => {
+      const code = (e as CustomEvent<string>).detail
+      if (code) setCurrencyLocal(code)
+      getProductsData()
+    }
+    window.addEventListener('sn-currency-change', handleCurrencyChange)
+    return () => window.removeEventListener('sn-currency-change', handleCurrencyChange)
   }, [])
 
   useEffect(() => {

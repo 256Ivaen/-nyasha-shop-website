@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
+import { useCurrency } from '@/contexts/CurrencyContext'
 import Title from '@/components/Title'
 import CartTotal from '@/components/CartTotal'
 import Image from 'next/image'
@@ -22,7 +23,8 @@ interface CartEntry {
 
 export default function CartPage() {
   const ctx = useContext(ShopContext)!
-  const { products, currency, cartItems, updateQuantity, navigate } = ctx
+  const { products, cartItems, updateQuantity, navigate } = ctx
+  const { formatAmount } = useCurrency()
   const [cartData, setCartData] = useState<CartEntry[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -80,7 +82,7 @@ export default function CartPage() {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-gray-900 truncate">{item.name}</h3>
                     <p className="text-xs text-gray-500 mt-1">{item.size !== 'default' ? `Size: ${item.size}` : ''}</p>
-                    <p className="font-semibold text-primary mt-1">{currency} {item.price.toLocaleString()}</p>
+                    <p className="font-semibold text-primary mt-1">{formatAmount(item.price)}</p>
                   </div>
                   <div className="flex items-center border border-gray-300 rounded-lg">
                     <button type="button" className="px-2 py-1 text-gray-600 hover:text-gray-900" onClick={() => updateQuantity(item._id, item.size, item.quantity - 1)}>−</button>

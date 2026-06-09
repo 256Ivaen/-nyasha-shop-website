@@ -12,7 +12,7 @@ import Image from 'next/image'
 
 export default function PlaceOrderPage() {
   const ctx = useContext(ShopContext)!
-  const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products, currency } = ctx
+  const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = ctx
   const [method, setMethod] = useState('cod')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -112,7 +112,7 @@ export default function PlaceOrderPage() {
             ))}
           </div>
           <div className="mt-4">
-            <select name="country" value={formData.country} onChange={handleChange}
+            <select name="country" title="Select country" value={formData.country} onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary">
               <option>Uganda</option>
               <option>Kenya</option>

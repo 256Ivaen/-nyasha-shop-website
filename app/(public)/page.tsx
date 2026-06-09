@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import Hero from '@/components/Hero'
+import CategoryPodsSection from '@/components/CategoryPodsSection'
+import PromoBannerStrip from '@/components/PromoBannerStrip'
 import LatestCollection from '@/components/LatestCollection'
+import CategoryProductRow from '@/components/CategoryProductRow'
 import BestSeller from '@/components/BestSeller'
-import Button from '@/components/Button'
 
 export const metadata: Metadata = {
   title: 'Home | SN Luxe Africa',
@@ -13,29 +14,50 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      {/*
-        Hero bleeds full-width and sits flush under the fixed navbar.
-        -mx-4 sm:-mx-[5vw] cancels the <main> side padding (same bleed used in Hero.tsx).
-        -mt-36 lg:-mt-44 cancels the <main> top padding so the hero starts right at the navbar bottom edge.
-      */}
+      {/* Hero — full-width, flush under navbar */}
       <div className="-mt-36 lg:-mt-44">
         <Hero />
       </div>
 
-      {/* ── CTA strip ─────────────────────────────────────────────────── */}
-      <div className="pt-14 pb-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-        <Link href="/collection">
-          <Button size="lg">SHOP ALL PRODUCTS</Button>
-        </Link>
-        <Link href="/collection?sort=newest">
-          <Button variant="outline" size="lg">NEW ARRIVALS</Button>
-        </Link>
-      </div>
+      {/* Amazon-style category pods (Comfy styles for her, for him, dog section, etc.)
+          Managed entirely from Admin → Featured Sections with background removal */}
+      <CategoryPodsSection />
 
-      <div className="pt-8">
-        <LatestCollection />
-        <BestSeller />
-      </div>
+      {/* Promo banner carousel */}
+      <PromoBannerStrip />
+
+      {/* Latest arrivals grid */}
+      <LatestCollection />
+
+      {/* Best Sellers horizontal scroll */}
+      <CategoryProductRow
+        title="Best Sellers"
+        subtitle="Most loved by our customers"
+        bestsellersOnly
+        viewAllHref="/collection?filter=bestseller"
+        limit={10}
+      />
+
+      {/* Eva Cosmetics horizontal scroll */}
+      <CategoryProductRow
+        title="Eva Cosmetics"
+        subtitle="Premium skincare & beauty"
+        subCategory="Evacosmetics"
+        viewAllHref="/evacosmetics"
+        limit={8}
+      />
+
+      {/* Detergents horizontal scroll */}
+      <CategoryProductRow
+        title="Detergents & Cleaning"
+        subtitle="Trusted brands for a clean home"
+        category="detergents"
+        viewAllHref="/detergents"
+        limit={8}
+      />
+
+      {/* Trust badges + full bestseller section */}
+      <BestSeller />
     </>
   )
 }

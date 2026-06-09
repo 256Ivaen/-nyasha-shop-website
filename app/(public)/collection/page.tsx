@@ -4,8 +4,11 @@ import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
 import Title from '@/components/Title'
 import ProductItem from '@/components/ProductItem'
+import Pagination from '@/components/Pagination'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Product } from '@/contexts/ShopContext'
+
+const PER_PAGE = 8
 
 export default function CollectionPage() {
   const ctx = useContext(ShopContext)!
@@ -16,6 +19,7 @@ export default function CollectionPage() {
   const [subCategory, setSubCategory] = useState<string[]>([])
   const [sortType, setSortType] = useState('relevant')
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const toggleCategory = (val: string) =>
     setCategory(prev => prev.includes(val) ? prev.filter(i => i !== val) : [...prev, val])
@@ -26,12 +30,11 @@ export default function CollectionPage() {
   const applyFilter = () => {
     setLoading(true)
     let copy = products.slice()
-    if (showSearch && search) {
-      copy = copy.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
-    }
+    if (showSearch && search) copy = copy.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     if (category.length > 0) copy = copy.filter(p => category.includes(p.category))
     if (subCategory.length > 0) copy = copy.filter(p => p.subCategory && subCategory.includes(p.subCategory))
     setFilterProducts(copy)
+    setCurrentPage(1)
     setTimeout(() => setLoading(false), 300)
   }
 
@@ -41,9 +44,13 @@ export default function CollectionPage() {
     let copy = filterProducts.slice()
     if (sortType === 'low-high') copy.sort((a, b) => a.price - b.price)
     else if (sortType === 'high-low') copy.sort((a, b) => b.price - a.price)
-    else applyFilter(); return
+    else { applyFilter(); return }
     setFilterProducts(copy)
+    setCurrentPage(1)
   }, [sortType])
+
+  const totalPages = Math.ceil(filterProducts.length / PER_PAGE)
+  const pageItems = filterProducts.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
 
   return (
     <div className="pt-10 pb-16">
@@ -81,26 +88,30 @@ export default function CollectionPage() {
         <div className="flex-1">
           <div className="flex justify-between items-center text-xs sm:text-xs mb-4">
             <Title text1="ALL" text2="COLLECTIONS" />
-            <select className="border-2 border-gray-300 text-xs px-2 py-1 rounded" value={sortType} onChange={e => setSortType(e.target.value)}>
-              <option value="relevant">Sort: Relevant</option>
-              <option value="low-high">Sort: Low to High</option>
-              <option value="high-low">Sort: High to Low</option>
-            </select>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-400">{filterProducts.length} products</span>
+              <select title="Sort products" className="border-2 border-gray-300 text-xs px-2 py-1 rounded" value={sortType} onChange={e => setSortType(e.target.value)}>
+                <option value="relevant">Sort: Relevant</option>
+                <option value="low-high">Sort: Low to High</option>
+                <option value="high-low">Sort: High to Low</option>
+              </select>
+            </div>
           </div>
+
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 8 }).map((_, i) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {Array.from({ length: PER_PAGE }).map((_, i) => (
                 <div key={i} className="bg-gray-100 animate-pulse rounded h-64" />
               ))}
             </div>
           ) : (
             <motion.div
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+              className="grid grid-cols-2 md:grid-cols-4 gap-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
               <AnimatePresence>
-                {filterProducts.map(item => (
+                {pageItems.map(item => (
                   <motion.div key={item._id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                     <ProductItem id={item._id} image={item.image} name={item.name} price={item.price} />
                   </motion.div>
@@ -108,9 +119,12 @@ export default function CollectionPage() {
               </AnimatePresence>
             </motion.div>
           )}
+
           {!loading && filterProducts.length === 0 && (
             <p className="text-center text-gray-500 py-20">No products found. Try adjusting your filters.</p>
           )}
+
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={p => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }) }} />
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { Manrope } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'sonner'
 import ShopContextProvider from '@/contexts/ShopContext'
+import { CurrencyProvider } from '@/contexts/CurrencyContext'
 import { BRAND, SITE_URL } from '@/assets/assets'
 
 const manrope = Manrope({
@@ -55,10 +56,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={manrope.variable}>
       <body className={`${manrope.className} bg-white text-gray-900`} suppressHydrationWarning>
-        <ShopContextProvider>
-          <Toaster position="top-center" richColors closeButton />
-          {children}
-        </ShopContextProvider>
+        <CurrencyProvider>
+          <ShopContextProvider>
+            <Toaster position="top-center" richColors closeButton />
+            {children}
+          </ShopContextProvider>
+        </CurrencyProvider>
       </body>
     </html>
   )

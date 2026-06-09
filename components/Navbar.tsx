@@ -11,6 +11,10 @@ import { ShopContext } from '@/contexts/ShopContext'
 import { useContext } from 'react'
 import { assets } from '@/assets/assets'
 import { ANNOUNCEMENTS } from '@/assets/content'
+import CurrencySelector from '@/components/CurrencySelector'
+import axios from 'axios'
+
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
 
 // ── Dropdown data ────────────────────────────────────────────────────────────
 const shopLinks = [
@@ -22,6 +26,7 @@ const shopLinks = [
 const infoLinks = [
   { label: 'About Us', href: '/about',   desc: 'Our story and mission' },
   { label: 'Contact',  href: '/contact', desc: 'Get in touch with us' },
+  { label: 'FAQs',     href: '/faq',     desc: 'Common questions answered' },
 ]
 
 const accountLoggedIn = [
@@ -96,10 +101,29 @@ export default function Navbar() {
   const [scrolled,     setScrolled]     = useState(false)
   const [annoIdx,      setAnnoIdx]      = useState(0)
 
+  // Dynamic categories from backend
+  const [categoryLinks, setCategoryLinks] = useState<DropItem[]>([])
+
   // Mobile accordion state
-  const [mShop,    setMShop]    = useState(false)
-  const [mInfo,    setMInfo]    = useState(false)
-  const [mAccount, setMAccount] = useState(false)
+  const [mShop,       setMShop]       = useState(false)
+  const [mCategories, setMCategories] = useState(false)
+  const [mInfo,       setMInfo]       = useState(false)
+  const [mAccount,    setMAccount]    = useState(false)
+
+  useEffect(() => {
+    axios.get(`${BACKEND}/api/v1/categories`)
+      .then(r => {
+        const cats: string[] = Array.isArray(r.data.categories)
+          ? r.data.categories
+          : Array.isArray(r.data) ? r.data : []
+        setCategoryLinks(cats.map(c => ({
+          label: c,
+          href:  `/category/${encodeURIComponent(c.toLowerCase().replace(/\s+/g, '-'))}`,
+          desc:  `Shop all ${c} products`,
+        })))
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const update = () => setScrolled(window.scrollY > 10)
@@ -202,6 +226,15 @@ export default function Navbar() {
               >
                 All Products
               </Link>
+              {categoryLinks.length > 0 && (
+                <NavDropdown
+                  label="Categories"
+                  items={categoryLinks}
+                  open={openDropdown === 'categories'}
+                  onEnter={() => open('categories')}
+                  onLeave={close}
+                />
+              )}
               <NavDropdown
                 label="Info"
                 items={infoLinks}
@@ -294,6 +327,9 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
 
+              {/* Currency selector */}
+              <CurrencySelector />
+
               {/* Cart */}
               <Link
                 href="/cart"
@@ -372,6 +408,22 @@ export default function Navbar() {
                   className="flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold text-ink hover:bg-primary-subtle">
                   All Products <ChevronRight size={13} />
                 </Link>
+
+                {/* Categories accordion */}
+                {categoryLinks.length > 0 && (
+                  <>
+                    <button type="button" onClick={() => setMCategories(v => !v)}
+                      className="flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold text-ink hover:bg-primary-subtle w-full">
+                      Categories <ChevronDown size={13} className={`transition-transform ${mCategories ? 'rotate-180' : ''}`} />
+                    </button>
+                    {mCategories && categoryLinks.map(l => (
+                      <Link key={l.label} href={l.href} onClick={() => setMobileOpen(false)}
+                        className="flex items-center justify-between px-6 py-2.5 rounded-xl text-xs font-medium text-ink-muted hover:text-primary hover:bg-primary-subtle transition-colors">
+                        <span>{l.label}</span><ChevronRight size={11} />
+                      </Link>
+                    ))}
+                  </>
+                )}
 
                 {/* Info accordion */}
                 <button type="button" onClick={() => setMInfo(v => !v)}

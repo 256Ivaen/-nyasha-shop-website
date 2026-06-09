@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
+import { useCurrency } from '@/contexts/CurrencyContext'
 import Title from '@/components/Title'
 import axios from 'axios'
 import { toast } from 'sonner'
@@ -30,7 +31,8 @@ interface Order {
 
 export default function OrdersPage() {
   const ctx = useContext(ShopContext)!
-  const { backendUrl, token, currency, navigate } = ctx
+  const { backendUrl, token, navigate } = ctx
+  const { formatAmount } = useCurrency()
   const [orderData, setOrderData] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -77,7 +79,7 @@ export default function OrdersPage() {
               <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                 <div>
                   <p className="text-xs text-gray-500">Order ID: {order._id}</p>
-                  <p className="text-xs font-semibold text-gray-900 mt-1">{currency} {order.amount?.toLocaleString()}</p>
+                  <p className="text-xs font-semibold text-gray-900 mt-1">{formatAmount(order.amount ?? 0)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 text-xs rounded-full font-medium ${
@@ -98,7 +100,7 @@ export default function OrdersPage() {
                     )}
                     <div>
                       <p className="text-xs font-medium text-gray-900">{item.name}</p>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity} {item.size !== 'default' ? `• ${item.size}` : ''} • {currency} {item.price?.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500">Qty: {item.quantity} {item.size !== 'default' ? `• ${item.size}` : ''} • {formatAmount(item.price ?? 0)}</p>
                     </div>
                   </div>
                 ))}

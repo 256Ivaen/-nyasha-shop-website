@@ -2,11 +2,13 @@
 
 import { useContext } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
+import { useCurrency } from '@/contexts/CurrencyContext'
 import Title from '@/components/Title'
 
 export default function CartTotal() {
   const ctx = useContext(ShopContext)!
-  const { currency, delivery_fee, getCartAmount } = ctx
+  const { delivery_fee, getCartAmount } = ctx
+  const { formatAmount } = useCurrency()
   const subtotal = getCartAmount()
   const total = subtotal === 0 ? 0 : subtotal + delivery_fee
 
@@ -18,15 +20,15 @@ export default function CartTotal() {
       <div className="space-y-3">
         <div className="flex justify-between py-3 border-b border-edge-light">
           <span className="text-ink-muted text-xs">Subtotal</span>
-          <span className="font-medium text-ink text-xs">{currency} {subtotal.toLocaleString()}</span>
+          <span className="font-medium text-ink text-xs">{formatAmount(subtotal)}</span>
         </div>
         <div className="flex justify-between py-3 border-b border-edge-light">
           <span className="text-ink-muted text-xs">Shipping Fee</span>
-          <span className="font-medium text-ink text-xs">{currency} {delivery_fee.toLocaleString()}</span>
+          <span className="font-medium text-ink text-xs">{formatAmount(delivery_fee)}</span>
         </div>
         <div className="flex justify-between py-4">
           <span className="text-xs font-bold text-ink">Total</span>
-          <span className="text-xs font-bold text-ink">{currency} {total.toLocaleString()}</span>
+          <span className="text-xs font-bold text-ink">{formatAmount(total)}</span>
         </div>
       </div>
     </div>
