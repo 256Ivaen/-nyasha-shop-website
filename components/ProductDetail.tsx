@@ -6,6 +6,7 @@ import { ShopContext } from '@/contexts/ShopContext'
 import { assets } from '@/assets/assets'
 import Image from 'next/image'
 import RelatedProducts from '@/components/RelatedProducts'
+import ProductReviews from '@/components/ProductReviews'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import { CheckCircle, ShoppingBag } from 'lucide-react'
@@ -144,14 +145,17 @@ export default function ProductDetail() {
           {['description', 'reviews'].map(tab => (
             <button type="button" key={tab} onClick={() => setActiveTab(tab)}
               className={`pb-3 text-xs font-medium capitalize border-b-2 transition-colors ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-              {tab === 'reviews' ? 'Reviews (122)' : 'Description'}
+              {tab === 'reviews' ? 'Reviews' : 'Description'}
             </button>
           ))}
         </div>
         <div className="py-6 text-xs text-gray-600 leading-relaxed">
-          {activeTab === 'description' ? productData.description : <p className="text-gray-500">Customer reviews coming soon.</p>}
+          {activeTab === 'description' && productData.description}
         </div>
       </div>
+
+      {/* Full reviews section */}
+      <ProductReviews productId={productData._id} />
 
       <RelatedProducts category={productData.category} subCategory={productData.subCategory} currentId={productData._id} />
     </div>
