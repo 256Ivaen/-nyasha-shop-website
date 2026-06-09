@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
+import Image from 'next/image'
 import { useCurrency } from '@/contexts/CurrencyContext'
 
 export default function CurrencySelector() {
-  const { currency, setCurrency, currencies, currenciesLoaded, currencySymbol } = useCurrency()
-  const [open, setOpen] = useState(false)
+  const { currency, setCurrency, currencies, currenciesLoaded } = useCurrency()
+  const [open, setOpen]     = useState(false)
   const [search, setSearch] = useState('')
-  const ref = useRef<HTMLDivElement>(null)
+  const ref       = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -28,7 +29,6 @@ export default function CurrencySelector() {
     else setSearch('')
   }, [open])
 
-  // Show a subtle loading skeleton until backend responds
   if (!currenciesLoaded) {
     return (
       <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs text-ink-muted">
@@ -37,12 +37,10 @@ export default function CurrencySelector() {
     )
   }
 
+  const selected = currencies.find(c => c.currency === currency)
+
   const filtered = search.trim()
-    ? currencies.filter(c =>
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.code.toLowerCase().includes(search.toLowerCase()) ||
-        c.symbol.toLowerCase().includes(search.toLowerCase())
-      )
+    ? currencies.filter(c => c.currency.toLowerCase().includes(search.toLowerCase()))
     : currencies
 
   return (
@@ -50,12 +48,21 @@ export default function CurrencySelector() {
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
           open ? 'bg-primary-subtle text-ink' : 'text-ink-muted hover:text-ink hover:bg-primary-subtle'
         }`}
       >
-        <span>{currencySymbol}</span>
-        <span className="hidden sm:inline">{currency}</span>
+        {selected?.flag_url && (
+          <Image
+            src={selected.flag_url}
+            alt={selected.country_code}
+            width={18}
+            height={13}
+            className="rounded-sm object-cover shrink-0"
+            unoptimized
+          />
+        )}
+        <span>{currency}</span>
         <ChevronDown size={11} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
@@ -66,7 +73,7 @@ export default function CurrencySelector() {
             animate={{ opacity: 1, y: 0,  scale: 1    }}
             exit={{    opacity: 0, y: 8,  scale: 0.97 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute right-0 top-full mt-1 w-60 bg-white border border-edge rounded-2xl overflow-hidden shadow-lg z-50"
+            className="absolute right-0 top-full mt-1 w-56 bg-white border border-edge rounded-2xl overflow-hidden shadow-lg z-50"
           >
             <div className="p-2 border-b border-edge-light">
               <input
@@ -84,17 +91,25 @@ export default function CurrencySelector() {
               ) : (
                 filtered.map(opt => (
                   <button
-                    key={opt.code}
+                    key={opt.currency}
                     type="button"
-                    onClick={() => { setCurrency(opt.code); setOpen(false) }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-colors text-left ${
-                      opt.code === currency
+                    onClick={() => { setCurrency(opt.currency); setOpen(false) }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors text-left ${
+                      opt.currency === currency
                         ? 'bg-primary text-white'
                         : 'hover:bg-primary-subtle text-ink'
                     }`}
                   >
-                    <span className="text-xs font-semibold">{opt.name}</span>
-                    <span className="text-xs opacity-70 ml-2 shrink-0">{opt.symbol} {opt.code}</span>
+                    <Image
+                      src={opt.flag_url}
+                      alt={opt.country_code}
+                      width={20}
+                      height={14}
+                      className="rounded-sm object-cover shrink-0"
+                      unoptimized
+                    />
+                    <span className="text-xs font-semibold flex-1">{opt.currency}</span>
+                    <span className={`text-xs shrink-0 ${opt.currency === currency ? 'opacity-80' : 'opacity-40'}`}>{opt.country_code}</span>
                   </button>
                 ))
               )}
