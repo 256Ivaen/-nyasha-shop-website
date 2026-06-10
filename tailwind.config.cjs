@@ -8,35 +8,43 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // ── Primary: black & white ────────────────────────────────────────
+        // ── Primary: Deep Gold Shadow ─────────────────────────────────────
         primary: {
-          DEFAULT:    '#000000',
-          hover:      '#222222',
+          DEFAULT:    '#A38043',   // Deep Gold Shadow
+          hover:      '#D4AF37',   // Liquid Gold
           foreground: '#ffffff',
-          subtle:     '#f5f5f5',   // very light black tint (replaces green-50/100)
+          subtle:     '#E5DAC9',   // Soft Beige Pattern
         },
 
         // ── Surfaces ─────────────────────────────────────────────────────
         surface: {
-          DEFAULT: '#ffffff',
-          muted:   '#f8f9fa',
+          DEFAULT: '#F9F6F0',   // Warm Alabaster
+          muted:   '#F9F6F0',
           card:    '#ffffff',
-          dark:    '#111111',
+          dark:    '#A38043',   // Deep Gold Shadow
         },
 
         // ── Borders ──────────────────────────────────────────────────────
         edge: {
-          DEFAULT: '#e5e7eb',
-          light:   '#f3f4f6',
-          dark:    '#d1d5db',
+          DEFAULT: '#E5DAC9',   // Soft Beige Pattern
+          light:   '#F9F6F0',   // Warm Alabaster
+          dark:    '#D4AF37',   // Liquid Gold
         },
 
         // ── Text ─────────────────────────────────────────────────────────
         ink: {
-          DEFAULT: '#1a1a1a',
-          muted:   '#6b7280',
-          light:   '#9ca3af',
+          DEFAULT: '#2C1A0E',   // deep warm brown for readability
+          muted:   '#7C6A54',   // muted gold-brown
+          light:   '#B8A88A',   // light gold-tan
           inverse: '#ffffff',
+        },
+
+        // ── Gold accents ──────────────────────────────────────────────────
+        gold: {
+          deep:   '#A38043',   // Deep Gold Shadow
+          liquid: '#D4AF37',   // Liquid Gold
+          beige:  '#E5DAC9',   // Soft Beige Pattern
+          cream:  '#F9F6F0',   // Warm Alabaster
         },
 
         // ── Status ───────────────────────────────────────────────────────

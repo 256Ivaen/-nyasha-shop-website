@@ -4,8 +4,20 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --gold-deep:   #A38043;
+  --gold-liquid: #D4AF37;
+  --gold-beige:  #E5DAC9;
+  --gold-cream:  #F9F6F0;
+}
+
 * {
   font-family: Outfit, var(--font-manrope), system-ui, sans-serif;
+}
+
+body {
+  background-color: #F9F6F0;
+  color: #2C1A0E;
 }
 
 .prata-regular {
@@ -43,7 +55,7 @@ a.active hr {
 
 @media (max-width: 640px) {
   a.active {
-    background-color: #000000;
+    background-color: #A38043;
     color: #ffffff;
   }
 }
