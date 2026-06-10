@@ -154,7 +154,7 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    const t = setInterval(() => setAnnoIdx(i => (i + 1) % ANNOUNCEMENTS.length), 4000)
+    const t = setInterval(() => setAnnoIdx(i => i + 1), 4000)
     return () => clearInterval(t)
   }, [])
 
