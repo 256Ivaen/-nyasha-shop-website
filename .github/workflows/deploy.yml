@@ -115,37 +115,3 @@ jobs:
           timeout: 120s
           command_timeout: 30m
 
-  # ─────────────────────────────────────────────────────────────────────────────
-  # JOB 4 — Post-deploy: clear any server-side cache
-  # ─────────────────────────────────────────────────────────────────────────────
-  post_deploy:
-    name: Post Deploy
-    needs: deploy
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Clear cache on server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host:     ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port:     ${{ secrets.SSH_PORT }}
-          command_timeout: 10m
-          script: |
-            echo "========================================"
-            echo "SN Luxe Africa — Storefront Post-Deploy"
-            echo "========================================"
-
-            SITE="/home/${{ secrets.SSH_USER }}/domains/papayawhip-quail-919643.hostingersite.com/public_html"
-            cd "$SITE"
-
-            # Set correct permissions
-            find . -type d -exec chmod 755 {} \;
-            find . -type f -exec chmod 644 {} \;
-
-            echo ""
-            echo "========================================"
-            echo "DEPLOYMENT COMPLETE"
-            echo "URL: https://papayawhip-quail-919643.hostingersite.com"
-            echo "========================================"
