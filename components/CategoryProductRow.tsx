@@ -88,7 +88,7 @@ export default function CategoryProductRow({ title, subtitle, category, subCateg
         >
           {items.map(p => (
             <div key={p._id} className="w-44 sm:w-48 shrink-0">
-              <ProductItem id={p._id} image={p.image} name={p.name} price={p.price} bestseller={p.bestseller} />
+              <ProductItem id={p._id} slug={p.slug} image={p.image} name={p.name} price={p.price} bestseller={p.bestseller} />
             </div>
           ))}
         </div>

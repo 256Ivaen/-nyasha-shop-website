@@ -8,6 +8,7 @@ import axios from 'axios'
 interface Product {
   _id: string
   id?: string | number
+  slug: string
   name: string
   price: number
   image: string[]
@@ -59,7 +60,7 @@ export default function SearchResults() {
       ) : results.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {results.map(p => (
-            <ProductItem key={p._id} id={p._id} image={p.image} name={p.name} price={p.price} bestseller={p.bestseller} />
+            <ProductItem key={p._id} id={p._id} slug={p.slug} image={p.image} name={p.name} price={p.price} bestseller={p.bestseller} />
           ))}
         </div>
       ) : (

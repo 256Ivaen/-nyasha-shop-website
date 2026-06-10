@@ -45,7 +45,7 @@ export default function LatestCollection() {
         <motion.div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
           initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
           {latest.map(item => (
-            <ProductItem key={item._id} id={item._id} name={item.name} image={item.image} price={item.price} />
+            <ProductItem key={item._id} id={item._id} slug={item.slug} name={item.name} image={item.image} price={item.price} />
           ))}
         </motion.div>
       ) : (

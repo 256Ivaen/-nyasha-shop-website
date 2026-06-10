@@ -7,7 +7,6 @@ import Button from '@/components/Button'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { motion } from 'framer-motion'
-import { assets } from '@/assets/assets'
 import Image from 'next/image'
 
 export default function PlaceOrderPage() {
@@ -159,8 +158,7 @@ export default function PlaceOrderPage() {
             <h3 className="text-xs font-semibold text-gray-900 mb-3">Payment Method</h3>
             <div className="space-y-3">
               {[
-                { id: 'mobilemoney', label: 'Mobile Money', icon: assets.mobilemoney },
-                { id: 'cod',         label: 'Cash on Delivery', icon: null },
+                { id: 'cod', label: 'Cash on Delivery', icon: null },
               ].map(m => (
                 <div
                   key={m.id}

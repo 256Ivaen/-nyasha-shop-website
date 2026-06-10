@@ -216,8 +216,8 @@ export default function Navbar() {
         )}
 
         {/* ── Main header ────────────────────────────────────────────── */}
-        <div className={`bg-white transition-all duration-300 ${scrolled ? 'border-b border-edge' : ''}`}>
-          <div className="px-4 sm:px-8 lg:px-16 py-3 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr]">
+        <div className={`bg-white transition-all duration-300 relative overflow-visible ${scrolled ? 'border-b border-edge' : ''}`}>
+          <div className="px-4 sm:px-8 lg:px-16 h-16 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr]">
 
             {/* LEFT — desktop nav dropdowns */}
             <nav className="hidden lg:flex items-center gap-0.5">
@@ -255,11 +255,9 @@ export default function Navbar() {
               />
             </nav>
 
-            {/* CENTER — Logo */}
-            <Link href="/" className="flex items-center justify-center shrink-0 hover:opacity-80 transition-opacity z-10 lg:mx-auto">
-              <span className="text-xl font-extrabold tracking-tight text-primary">
-                SN <span className="font-medium text-gray-500">Luxe Africa</span>
-              </span>
+            {/* CENTER — Logo (overflows bottom of navbar by half its height) */}
+            <Link href="/" className="absolute left-1/2 -translate-x-1/2 top-0 z-20 hover:opacity-90 transition-opacity">
+              <Image src={assets.logo} alt="SN Luxe Africa" width={128} height={128} className="h-32 w-32 object-contain drop-shadow-md" priority />
             </Link>
 
             {/* RIGHT — icons + account dropdown */}

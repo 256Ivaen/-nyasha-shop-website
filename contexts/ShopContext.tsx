@@ -7,6 +7,7 @@ import axios from 'axios'
 
 export interface Product {
   _id: string
+  slug: string
   name: string
   description: string
   price: number

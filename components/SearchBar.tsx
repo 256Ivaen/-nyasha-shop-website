@@ -13,6 +13,7 @@ import axios from 'axios'
 interface SearchProduct {
   _id?: string
   id?: string | number
+  slug: string
   name: string
   price: number
   image: string[]
@@ -140,7 +141,7 @@ export default function SearchBar() {
                       {suggestions.map(p => (
                         <Link
                           key={p._id}
-                          href={`/product?id=${p._id}`}
+                          href={`/product/${p.slug}`}
                           onClick={handleClose}
                           className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
                         >

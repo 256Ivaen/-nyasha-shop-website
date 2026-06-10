@@ -77,7 +77,7 @@ export default function NewArrivalsClient() {
           <AnimatePresence>
             {pageItems.map(p => (
               <motion.div key={p._id} layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                <ProductItem id={p._id} image={p.image} name={p.name} price={p.price} bestseller={p.bestseller} />
+                <ProductItem id={p._id} slug={p.slug} image={p.image} name={p.name} price={p.price} bestseller={p.bestseller} />
               </motion.div>
             ))}
           </AnimatePresence>

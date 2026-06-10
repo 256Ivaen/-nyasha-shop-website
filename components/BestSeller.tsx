@@ -41,7 +41,7 @@ export default function BestSeller() {
       ) : bestSellers.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
           {bestSellers.map(item => (
-            <ProductItem key={item._id} id={item._id} name={item.name} image={item.image} price={item.price} bestseller />
+            <ProductItem key={item._id} id={item._id} slug={item.slug} name={item.name} image={item.image} price={item.price} bestseller />
           ))}
         </div>
       ) : (

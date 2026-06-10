@@ -10,6 +10,7 @@ import Button from '@/components/Button'
 
 interface ProductItemProps {
   id: string
+  slug: string
   image: string[]
   name: string
   price: number
@@ -17,7 +18,7 @@ interface ProductItemProps {
   originalPrice?: number
 }
 
-export default function ProductItem({ id, image, name, price, bestseller, originalPrice }: ProductItemProps) {
+export default function ProductItem({ id, slug, image, name, price, bestseller, originalPrice }: ProductItemProps) {
   const ctx = useContext(ShopContext)!
   const { addToCart, cartItems, updateQuantity, displayPrice } = ctx
   const [isUpdating, setIsUpdating] = useState(false)
@@ -62,7 +63,7 @@ export default function ProductItem({ id, image, name, price, bestseller, origin
       transition={{ duration: 0.3 }}
       whileHover={{ y: -4 }}
     >
-      <Link href={`/product?id=${id}`} className="flex flex-col flex-grow">
+      <Link href={`/product/${slug}`} className="flex flex-col flex-grow">
         {/* Badges */}
         <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
           {bestseller && (
@@ -133,7 +134,7 @@ export default function ProductItem({ id, image, name, price, bestseller, origin
 
       {/* Cart actions — VIEW left (flex-1) | ADD/qty right (fixed square) */}
       <div className="px-3 pb-3 flex items-center gap-2">
-        <Link href={`/product?id=${id}`} className="flex-1 min-w-0">
+        <Link href={`/product/${slug}`} className="flex-1 min-w-0">
           <Button variant="outline" fullWidth size="sm">VIEW</Button>
         </Link>
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useContext, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { ShopContext } from '@/contexts/ShopContext'
 import { assets } from '@/assets/assets'
 import Image from 'next/image'
@@ -14,8 +14,9 @@ import Button from '@/components/Button'
 import type { Product } from '@/contexts/ShopContext'
 
 export default function ProductDetail() {
-  const searchParams = useSearchParams()
-  const productId = searchParams.get('id') ?? ''
+  const pathname = usePathname()
+  // pathname is /product/{slug} or /product/_ (shell)
+  const slug = pathname.split('/').filter(Boolean).pop() ?? ''
   const ctx = useContext(ShopContext)!
   const { products, currency, displayPrice, addToCart } = ctx
   const [productData, setProductData] = useState<Product | null>(null)
@@ -25,13 +26,14 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState('description')
 
   useEffect(() => {
-    const found = products.find(p => p._id === productId)
+    if (!slug || slug === '_') return
+    const found = products.find(p => p.slug === slug)
     if (found) {
       setProductData(found)
       setImage(found.image?.[0] ?? '')
       window.scrollTo(0, 0)
     }
-  }, [productId, products])
+  }, [slug, products])
 
   if (!productData) {
     return (

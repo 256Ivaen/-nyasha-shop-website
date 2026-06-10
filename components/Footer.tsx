@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { Facebook, Instagram, MapPin, Phone, Mail, Clock } from 'lucide-react'
+import Image from 'next/image'
 import { BRAND, CONTACT, FOOTER_QUICK_LINKS, FOOTER_QUICK_SHOP, ANNOUNCEMENTS } from '@/assets/content'
 
 function TikTokIcon({ className }: { className?: string }) {
@@ -128,9 +129,7 @@ export default function Footer() {
 
           {/* Col 1: Brand */}
           <div>
-            <p className="text-xl font-extrabold tracking-tight mb-5">
-              SN <span className="font-medium text-white/60">Luxe Africa</span>
-            </p>
+            <Image src={BRAND.logo} alt="SN Luxe Africa" width={56} height={56} className="h-14 w-14 object-contain mb-5" />
             <p className="text-white/60 text-xs leading-relaxed mb-6">
               {BRAND.description}
             </p>

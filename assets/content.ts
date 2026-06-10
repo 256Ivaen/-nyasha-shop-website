@@ -3,19 +3,18 @@ export const BRAND = {
   shortName:      'SN Luxe',
   tagline:        'Authentic African Fashion Delivered Across the UK',
   description:    'Your home for authentic African print fashion in the UK. Ankara, Kente, Kitenge, Dashiki and more — handcrafted and delivered to your door.',
-  logo:           '/assets/logo.svg',
-  logoPng:        '/assets/logo.png',
+  logo:           '/assets/SNlogo.png',
   currency:       'GBP',
   currencySymbol: '£',
 } as const
 
 export const CONTACT = {
-  phone:       '+44 7471 406788',
+  phone:       '+44 7398 277613',
   email:       'snluxeafrica@gmail.com',
   address:     'United Kingdom',
   fullAddress: 'United Kingdom',
   hours:       '9:00 – 18:00, Monday – Saturday',
-  whatsapp:    'https://wa.me/447471406788',
+  whatsapp:    'https://wa.me/447398277613',
   instagram:   'https://www.instagram.com/snluxeafrica',
   facebook:    'https://www.facebook.com/snluxeafrica',
   tiktok:      'https://www.tiktok.com/@snluxeafrica',

@@ -78,7 +78,7 @@ export default function DetergentsPage() {
               <AnimatePresence>
                 {pageItems.map(item => (
                   <motion.div key={item._id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                    <ProductItem id={item._id} image={item.image} name={item.name} price={item.price} />
+                    <ProductItem id={item._id} slug={item.slug} image={item.image} name={item.name} price={item.price} />
                   </motion.div>
                 ))}
               </AnimatePresence>
