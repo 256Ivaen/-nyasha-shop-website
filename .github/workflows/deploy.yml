@@ -109,7 +109,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port:     ${{ secrets.SSH_PORT }}
           source:   "release/*"
-          target:   "/home/${{ secrets.SSH_USER }}/domains/snluxeafrica.com/public_html/"
+          target:   "/home/${{ secrets.SSH_USER }}/domains/papayawhip-quail-919643.hostingersite.com/public_html/"
           strip_components: 1
           overwrite: true
           timeout: 120s
@@ -137,7 +137,7 @@ jobs:
             echo "SN Luxe Africa — Storefront Post-Deploy"
             echo "========================================"
 
-            SITE="/home/${{ secrets.SSH_USER }}/domains/snluxeafrica.com/public_html"
+            SITE="/home/${{ secrets.SSH_USER }}/domains/papayawhip-quail-919643.hostingersite.com/public_html"
             cd "$SITE"
 
             # Set correct permissions
@@ -147,5 +147,5 @@ jobs:
             echo ""
             echo "========================================"
             echo "DEPLOYMENT COMPLETE"
-            echo "URL: https://snluxeafrica.com"
+            echo "URL: https://papayawhip-quail-919643.hostingersite.com"
             echo "========================================"
