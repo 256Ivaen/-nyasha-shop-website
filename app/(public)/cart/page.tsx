@@ -2,7 +2,6 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
-import { useCurrency } from '@/contexts/CurrencyContext'
 import Title from '@/components/Title'
 import CartTotal from '@/components/CartTotal'
 import Image from 'next/image'
@@ -23,8 +22,8 @@ interface CartEntry {
 
 export default function CartPage() {
   const ctx = useContext(ShopContext)!
-  const { products, cartItems, updateQuantity, navigate } = ctx
-  const { formatAmount } = useCurrency()
+  const { products, cartItems, updateQuantity, navigate, displayPrice } = ctx
+  const formatAmount = displayPrice
   const [cartData, setCartData] = useState<CartEntry[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -89,8 +88,8 @@ export default function CartPage() {
                     <span className="px-3 py-1 text-xs">{item.quantity}</span>
                     <button type="button" className="px-2 py-1 text-gray-600 hover:text-gray-900" onClick={() => updateQuantity(item._id, item.size, item.quantity + 1)}>+</button>
                   </div>
-                  <button type="button" onClick={() => handleRemove(item._id, item.size)} className="p-2 text-red-500 hover:text-red-700">
-                    <Image src={assets.bin_icon} alt="remove" width={18} height={18} />
+                  <button type="button" title="Remove item" aria-label="Remove item" onClick={() => handleRemove(item._id, item.size)} className="p-2 text-red-500 hover:text-red-700">
+                    <Image src={assets.bin_icon} alt="" width={18} height={18} />
                   </button>
                 </motion.div>
               ))}

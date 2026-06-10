@@ -2,13 +2,12 @@
 
 import { useContext } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
-import { useCurrency } from '@/contexts/CurrencyContext'
 import Title from '@/components/Title'
 
 export default function CartTotal() {
   const ctx = useContext(ShopContext)!
-  const { delivery_fee, getCartAmount } = ctx
-  const { formatAmount } = useCurrency()
+  const { delivery_fee, getCartAmount, displayPrice } = ctx
+  const formatAmount = displayPrice
   const subtotal = getCartAmount()
   const total = subtotal === 0 ? 0 : subtotal + delivery_fee
 
