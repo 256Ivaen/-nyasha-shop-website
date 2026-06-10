@@ -9,7 +9,7 @@ import type { Product } from '@/contexts/ShopContext'
 
 const badges = [
   { Icon: ShieldCheck, title: '100% Authentic', desc: 'All products are genuine and quality-checked.' },
-  { Icon: Truck,       title: 'Fast Delivery',  desc: 'Quick delivery across Kampala and Uganda.' },
+  { Icon: Truck,       title: 'Fast Delivery',  desc: 'Quick delivery across the United Kingdom.' },
   { Icon: RotateCcw,   title: 'Easy Returns',   desc: '7-day hassle-free return policy.' },
   { Icon: Headphones,  title: '24/7 Support',   desc: 'We are always here to help you.' },
 ]

@@ -18,7 +18,7 @@ export default function PlaceOrderPage() {
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', phone: '',
-    street: '', city: '', country: 'Uganda',
+    street: '', city: '', country: 'United Kingdom',
   })
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function PlaceOrderPage() {
               phone:     p.phone      ?? '',
               street:    p.street     ?? '',
               city:      p.city       ?? '',
-              country:   p.country    ?? 'Uganda',
+              country:   p.country    ?? 'United Kingdom',
             })
           }
         }
@@ -139,10 +139,11 @@ export default function PlaceOrderPage() {
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option>Uganda</option>
-              <option>Kenya</option>
-              <option>Tanzania</option>
-              <option>Rwanda</option>
+              <option>United Kingdom</option>
+              <option>England</option>
+              <option>Scotland</option>
+              <option>Wales</option>
+              <option>Northern Ireland</option>
             </select>
           </div>
         </motion.div>

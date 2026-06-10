@@ -25,7 +25,7 @@ export default function ProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<ProfileForm>({
     firstName: '', lastName: '', email: '', phone: '',
-    street: '', city: '', country: 'Uganda', dateOfBirth: '',
+    street: '', city: '', country: 'United Kingdom', dateOfBirth: '',
   })
 
   useEffect(() => {
@@ -89,7 +89,7 @@ export default function ProfilePage() {
             { name: 'email',       label: 'Email',         placeholder: 'you@example.com', type: 'email', disabled: true },
             { name: 'phone',       label: 'Phone',         placeholder: '+256 700 000000' },
             { name: 'street',      label: 'Street Address',placeholder: '123 Main St' },
-            { name: 'city',        label: 'City',          placeholder: 'Kampala' },
+            { name: 'city',        label: 'City',          placeholder: 'London' },
             { name: 'dateOfBirth', label: 'Date of Birth', placeholder: '', type: 'date' },
           ].map(field => {
             const fieldId = `profile-${field.name}`
@@ -112,10 +112,11 @@ export default function ProfilePage() {
             <label htmlFor="profile-country" className="block text-xs font-medium text-gray-500 mb-1">Country</label>
             <select id="profile-country" name="country" title="Country" value={formData.country} onChange={handleChange} disabled={!isEditing}
               className="w-full border border-gray-300 rounded-full px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-50">
-              <option>Uganda</option>
-              <option>Kenya</option>
-              <option>Tanzania</option>
-              <option>Rwanda</option>
+              <option>United Kingdom</option>
+              <option>England</option>
+              <option>Scotland</option>
+              <option>Wales</option>
+              <option>Northern Ireland</option>
             </select>
           </div>
         </div>

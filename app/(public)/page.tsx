@@ -8,7 +8,7 @@ import BestSeller from '@/components/BestSeller'
 
 export const metadata: Metadata = {
   title: 'Home | SN Luxe Africa',
-  description: 'Shop quality products in Kampala. Trusted distributor delivering to your door.',
+  description: 'Authentic African print fashion delivered across the UK. Shop Ankara, Kente, Dashiki and more.',
 }
 
 export default function HomePage() {
