@@ -217,7 +217,12 @@ export default function Navbar() {
 
         {/* ── Main header ────────────────────────────────────────────── */}
         <div className={`bg-white transition-all duration-300 relative overflow-visible ${scrolled ? 'border-b border-edge' : ''}`}>
-          <div className="px-4 sm:px-8 lg:px-16 h-16 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr]">
+          {/* Logo: absolute over center column, top-0 so it starts at navbar top and overflows 50% below */}
+          <Link href="/" className="absolute left-1/2 -translate-x-1/2 top-0 z-20 hover:opacity-90 transition-opacity hidden lg:block">
+            <Image src={assets.logo} alt="SN Luxe Africa" width={128} height={128} className="h-32 w-32 object-contain drop-shadow-md" priority />
+          </Link>
+
+          <div className="px-4 sm:px-8 lg:px-16 py-3 flex items-center justify-between lg:grid lg:grid-cols-[1fr_128px_1fr]">
 
             {/* LEFT — desktop nav dropdowns */}
             <nav className="hidden lg:flex items-center gap-0.5">
@@ -255,10 +260,8 @@ export default function Navbar() {
               />
             </nav>
 
-            {/* CENTER — Logo (overflows bottom of navbar by half its height) */}
-            <Link href="/" className="absolute left-1/2 -translate-x-1/2 top-0 z-20 hover:opacity-90 transition-opacity">
-              <Image src={assets.logo} alt="SN Luxe Africa" width={128} height={128} className="h-32 w-32 object-contain drop-shadow-md" priority />
-            </Link>
+            {/* CENTER — invisible placeholder that reserves 128px so left/right stay balanced */}
+            <div className="hidden lg:block" aria-hidden="true" />
 
             {/* RIGHT — icons + account dropdown */}
             <div className="hidden lg:flex items-center justify-end gap-1">
