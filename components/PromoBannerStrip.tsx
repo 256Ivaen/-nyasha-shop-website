@@ -64,7 +64,7 @@ export default function PromoBannerStrip() {
       .finally(() => setLoading(false))
   }, [])
 
-  // Auto-advance every 6s — step through pairs (0 → 2 → 4 → back to 0)
+  // Auto-advance every 6s — only when there are more than 2 banners
   useEffect(() => {
     if (banners.length <= 2) return
     const t = setInterval(() => {
@@ -102,8 +102,8 @@ export default function PromoBannerStrip() {
         </div>
       </AnimatePresence>
 
-      {/* Pair dots */}
-      {totalPairs > 1 && (
+      {/* Dots only when there are more banners than the current view can show */}
+      {banners.length > 2 && (
         <div className="flex justify-center gap-1.5 mt-3">
           {Array.from({ length: totalPairs }).map((_, i) => (
             <button
