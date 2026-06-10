@@ -5,9 +5,13 @@ import { ChevronDown } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import { useCurrency } from '@/contexts/CurrencyContext'
+import { useContext } from 'react'
+import { ShopContext } from '@/contexts/ShopContext'
 
 export default function CurrencySelector() {
   const { currency, setCurrency, currencies, currenciesLoaded } = useCurrency()
+  const shopCtx = useContext(ShopContext)
+  const currencyLoading = shopCtx?.currencyLoading ?? false
   const [open, setOpen]     = useState(false)
   const [search, setSearch] = useState('')
   const ref       = useRef<HTMLDivElement>(null)
@@ -31,8 +35,9 @@ export default function CurrencySelector() {
 
   if (!currenciesLoaded) {
     return (
-      <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs text-ink-muted">
-        <span className="w-6 h-3 bg-gray-200 rounded animate-pulse" />
+      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full">
+        <span className="w-5 h-3.5 bg-gray-200 rounded animate-pulse" />
+        <span className="w-8 h-3 bg-gray-200 rounded animate-pulse" />
       </div>
     )
   }
@@ -45,26 +50,33 @@ export default function CurrencySelector() {
 
   return (
     <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen(v => !v)}
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-          open ? 'bg-primary-subtle text-ink' : 'text-ink-muted hover:text-ink hover:bg-primary-subtle'
-        }`}
-      >
-        {selected?.flag_url && (
-          <Image
-            src={selected.flag_url}
-            alt={selected.country_code}
-            width={18}
-            height={13}
-            className="rounded-sm object-cover shrink-0"
-            unoptimized
-          />
-        )}
-        <span>{currency}</span>
-        <ChevronDown size={11} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
+      {currencyLoading ? (
+        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full">
+          <span className="w-5 h-3.5 bg-gray-200 rounded animate-pulse" />
+          <span className="w-8 h-3 bg-gray-200 rounded animate-pulse" />
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+            open ? 'bg-primary-subtle text-ink' : 'text-ink-muted hover:text-ink hover:bg-primary-subtle'
+          }`}
+        >
+          {selected?.flag_url && (
+            <Image
+              src={selected.flag_url}
+              alt={selected.country_code}
+              width={18}
+              height={13}
+              className="rounded-sm object-cover shrink-0"
+              unoptimized
+            />
+          )}
+          <span>{currency}</span>
+          <ChevronDown size={11} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        </button>
+      )}
 
       <AnimatePresence>
         {open && (

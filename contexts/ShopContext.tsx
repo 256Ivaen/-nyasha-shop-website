@@ -56,6 +56,7 @@ interface ShopContextValue {
   getUserData: (token: string) => Promise<void>
   getUserProfile: () => Promise<unknown>
   updateUserProfile: (data: unknown) => Promise<{ success: boolean; message?: string }>
+  currencyLoading: boolean
 }
 
 export const ShopContext = createContext<ShopContextValue | null>(null)
@@ -67,7 +68,8 @@ export function useShop() {
 }
 
 export default function ShopContextProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrencyLocal] = useState('GBP')
+  const [currency, setCurrencyLocal]     = useState('GBP')
+  const [currencyLoading, setCurrencyLoading] = useState(false)
   const delivery_fee = 5000
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
   const [search, setSearch] = useState('')
@@ -140,7 +142,8 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
     return total
   }
 
-  const getProductsData = async () => {
+  const getProductsData = async (isCurrencySwitch = false) => {
+    if (isCurrencySwitch) setCurrencyLoading(true)
     try {
       const deviceToken = typeof window !== 'undefined' ? localStorage.getItem('sn_device_token') ?? '' : ''
       const currency    = typeof window !== 'undefined' ? localStorage.getItem('sn_preferred_currency') ?? 'GBP' : 'GBP'
@@ -155,6 +158,8 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
       }
     } catch {
       toast.error('Failed to fetch products')
+    } finally {
+      if (isCurrencySwitch) setCurrencyLoading(false)
     }
   }
 
@@ -272,7 +277,7 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
     const handleCurrencyChange = (e: Event) => {
       const code = (e as CustomEvent<string>).detail
       if (code) setCurrencyLocal(code)
-      getProductsData()
+      getProductsData(true)
     }
     window.addEventListener('sn-currency-change', handleCurrencyChange)
     return () => window.removeEventListener('sn-currency-change', handleCurrencyChange)
@@ -296,7 +301,7 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   return (
     <ShopContext.Provider
       value={{
-        products, currency, delivery_fee,
+        products, currency, currencyLoading, delivery_fee,
         search, setSearch, showSearch, setShowSearch,
         cartItems, addToCart, setCartItems,
         getCartCount, updateQuantity,
