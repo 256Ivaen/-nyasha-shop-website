@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { assets } from '@/assets/assets'
+import { CONTACT } from '@/assets/content'
 import Button from '@/components/Button'
 import Image from 'next/image'
 
@@ -42,10 +43,10 @@ export default function ContactPage() {
           <Image src={assets.contact_img} alt="Contact SN Luxe Africa" width={600} height={256} className="w-full h-64 object-cover rounded-xl mb-6" />
           <div className="space-y-4">
             {[
-              { label: 'Location', value: 'Kampala, Uganda' },
-              { label: 'Phone', value: '+256 700 000000' },
-              { label: 'Email', value: 'info@trtcl.com' },
-              { label: 'Hours', value: 'Mon – Sat: 8am – 6pm' },
+              { label: 'Location', value: CONTACT.fullAddress },
+              { label: 'Phone', value: CONTACT.phone },
+              { label: 'Email', value: CONTACT.email },
+              { label: 'Hours', value: CONTACT.hours },
             ].map(info => (
               <div key={info.label} className="flex gap-3">
                 <span className="font-semibold text-gray-700 min-w-[80px]">{info.label}:</span>
