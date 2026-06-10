@@ -1,0 +1,151 @@
+name: SN Luxe Africa — Storefront Pipeline
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+  push:
+    branches: [ main, dev ]
+  workflow_dispatch:
+
+jobs:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Validate: TypeScript check
+  # ─────────────────────────────────────────────────────────────────────────────
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Build: Next.js static export, upload artifact
+  # ─────────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build
+    needs: validate
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Write environment file
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo '${{ secrets.FRONTEND_ENV_PROD }}' > .env.local
+          else
+            echo '${{ secrets.FRONTEND_ENV_DEV }}' > .env.local
+          fi
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build static export
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Remove dev-only files before packaging
+        run: |
+          rm -rf .git .github node_modules .next/cache
+
+      - name: Package build artifact
+        run: tar -czf /tmp/build.tar.gz out/
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: storefront-${{ github.sha }}
+          path: /tmp/build.tar.gz
+          retention-days: 1
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Deploy: SCP static files to server
+  # ─────────────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: storefront-${{ github.sha }}
+          path: .
+
+      - name: Extract build
+        run: |
+          mkdir -p release
+          tar -xzf build.tar.gz -C release --strip-components=1
+
+      - name: Upload to server via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host:     ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port:     ${{ secrets.SSH_PORT }}
+          source:   "release/*"
+          target:   "/home/${{ secrets.SSH_USER }}/domains/snluxeafrica.com/public_html/"
+          strip_components: 1
+          overwrite: true
+          timeout: 120s
+          command_timeout: 30m
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 4 — Post-deploy: clear any server-side cache
+  # ─────────────────────────────────────────────────────────────────────────────
+  post_deploy:
+    name: Post Deploy
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clear cache on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port:     ${{ secrets.SSH_PORT }}
+          command_timeout: 10m
+          script: |
+            echo "========================================"
+            echo "SN Luxe Africa — Storefront Post-Deploy"
+            echo "========================================"
+
+            SITE="/home/${{ secrets.SSH_USER }}/domains/snluxeafrica.com/public_html"
+            cd "$SITE"
+
+            # Set correct permissions
+            find . -type d -exec chmod 755 {} \;
+            find . -type f -exec chmod 644 {} \;
+
+            echo ""
+            echo "========================================"
+            echo "DEPLOYMENT COMPLETE"
+            echo "URL: https://snluxeafrica.com"
+            echo "========================================"
