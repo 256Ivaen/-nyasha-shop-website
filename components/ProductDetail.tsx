@@ -17,7 +17,7 @@ export default function ProductDetail() {
   const searchParams = useSearchParams()
   const productId = searchParams.get('id') ?? ''
   const ctx = useContext(ShopContext)!
-  const { products, currency, addToCart } = ctx
+  const { products, currency, displayPrice, addToCart } = ctx
   const [productData, setProductData] = useState<Product | null>(null)
   const [image, setImage] = useState('')
   const [size, setSize] = useState('')
@@ -85,7 +85,7 @@ export default function ProductDetail() {
             <Image src={assets.star_dull_icon} alt="half star" width={14} height={14} />
             <span className="text-xs text-gray-500 ml-2">(122)</span>
           </div>
-          <p className="text-xs font-bold text-primary mb-4">{currency}{productData.price?.toLocaleString()}</p>
+          <p className="text-xs font-bold text-primary mb-4">{displayPrice(productData.price ?? 0)}</p>
           <p className="text-gray-600 text-xs leading-relaxed mb-6">{productData.description}</p>
 
           {(productData.sizes?.length ?? 0) > 0 && (

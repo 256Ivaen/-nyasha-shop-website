@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import ProductItem from '@/components/ProductItem'
-import { useCurrency } from '@/contexts/CurrencyContext'
 import axios from 'axios'
 
 interface Product {
@@ -21,8 +20,6 @@ const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
 export default function SearchResults() {
   const params   = useSearchParams()
   const query    = params.get('q') ?? ''
-  const { currency } = useCurrency()
-
   const [results, setResults] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -32,7 +29,7 @@ export default function SearchResults() {
     const token = typeof window !== 'undefined' ? localStorage.getItem('sn_device_token') ?? '' : ''
     axios.get(`${BACKEND}/api/v1/products/search`, {
       params: { q: query },
-      headers: { 'X-Currency': currency, 'X-Device-Token': token },
+      headers: { 'X-Device-Token': token },
     })
       .then(r => {
         const mapped = (r.data.products ?? []).map((p: Product) => ({
@@ -42,7 +39,7 @@ export default function SearchResults() {
       })
       .catch(() => setResults([]))
       .finally(() => setLoading(false))
-  }, [query, currency])
+  }, [query])
 
   return (
     <div className="pt-10 pb-16">

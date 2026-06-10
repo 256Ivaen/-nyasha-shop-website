@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ShopContext } from '@/contexts/ShopContext'
-import { useCurrency } from '@/contexts/CurrencyContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { assets } from '@/assets/assets'
 import { Search, X } from 'lucide-react'
@@ -24,8 +23,7 @@ const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
 
 export default function SearchBar() {
   const ctx = useContext(ShopContext)!
-  const { search, setSearch, showSearch, setShowSearch, backendUrl } = ctx
-  const { formatAmount, currency, deviceToken } = useCurrency()
+  const { search, setSearch, showSearch, setShowSearch, backendUrl, displayPrice } = ctx
   const router   = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -44,7 +42,7 @@ export default function SearchBar() {
       const token = typeof window !== 'undefined' ? localStorage.getItem('sn_device_token') ?? '' : ''
       const res = await axios.get(`${BACKEND}/api/v1/products/search`, {
         params: { q },
-        headers: { 'X-Currency': currency, 'X-Device-Token': token },
+        headers: { 'X-Device-Token': token },
       })
       const products = (res.data.products ?? []).slice(0, 6).map((p: SearchProduct & { id?: string | number }) => ({
         ...p, _id: String(p._id ?? p.id ?? ''),
@@ -55,7 +53,7 @@ export default function SearchBar() {
     } finally {
       setLoading(false)
     }
-  }, [currency])
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
@@ -153,7 +151,7 @@ export default function SearchBar() {
                             <p className="text-xs font-semibold text-gray-900 truncate">{p.name}</p>
                             <p className="text-[11px] text-gray-400">{p.category}</p>
                           </div>
-                          <span className="text-xs font-bold text-primary shrink-0">{formatAmount(p.price)}</span>
+                          <span className="text-xs font-bold text-primary shrink-0">{displayPrice(p.price)}</span>
                         </Link>
                       ))}
                       <button
