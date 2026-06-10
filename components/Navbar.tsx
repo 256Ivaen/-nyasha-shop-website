@@ -18,8 +18,9 @@ const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
 // ── Dropdown data ────────────────────────────────────────────────────────────
 const shopLinks = [
   { label: 'All Products',  href: '/collection',                   desc: 'Browse everything we carry' },
-  { label: 'New Arrivals',  href: '/collection?sort=newest',       desc: 'Just landed in store' },
-  { label: 'Best Sellers',  href: '/collection?filter=bestseller', desc: 'Most loved by customers' },
+  { label: 'New Arrivals',  href: '/new-arrivals',                 desc: 'Just landed in store' },
+  { label: 'Best Sellers',  href: '/bestsellers',                  desc: 'Most loved by customers' },
+  { label: 'Discounted',    href: '/discounted',                   desc: 'Special deals and offers' },
 ]
 
 const infoLinks = [
@@ -133,14 +134,12 @@ export default function Navbar() {
   useEffect(() => {
     axios.get(`${BACKEND}/api/v1/categories`)
       .then(r => {
-        const cats: string[] = Array.isArray(r.data.categories)
-          ? r.data.categories
-          : Array.isArray(r.data) ? r.data : []
-        setCategoryLinks(cats.map(c => ({
-          label: c,
-          href:  `/category/${encodeURIComponent(c.toLowerCase().replace(/\s+/g, '-'))}`,
-          desc:  `Shop all ${c} products`,
-        })))
+        const raw = Array.isArray(r.data.categories) ? r.data.categories : Array.isArray(r.data) ? r.data : []
+        setCategoryLinks(raw.map((c: { name?: string; slug?: string } | string) => {
+          const name = typeof c === 'string' ? c : (c.name ?? '')
+          const slug = typeof c === 'string' ? name.toLowerCase().replace(/\s+/g, '-') : (c.slug ?? name.toLowerCase().replace(/\s+/g, '-'))
+          return { label: name, href: `/category/${slug}`, desc: `Shop all ${name}` }
+        }))
       })
       .catch(() => {})
       .finally(() => setCategoriesLoading(false))
@@ -239,16 +238,6 @@ export default function Navbar() {
                 onEnter={() => open('shop')}
                 onLeave={close}
               />
-              <Link
-                href="/collection"
-                className={`px-3 py-2 rounded-full text-xs font-semibold transition-colors duration-200 ${
-                  isActive(pathname, '/collection')
-                    ? 'text-ink bg-primary-subtle'
-                    : 'text-ink-muted hover:text-ink hover:bg-primary-subtle'
-                }`}
-              >
-                All Products
-              </Link>
               <NavDropdown
                 label="Categories"
                 items={categoryLinks}
@@ -425,11 +414,6 @@ export default function Navbar() {
                     <span>{l.label}</span><ChevronRight size={11} />
                   </Link>
                 ))}
-
-                <Link href="/collection" onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold text-ink hover:bg-primary-subtle">
-                  All Products <ChevronRight size={13} />
-                </Link>
 
                 {/* Categories accordion */}
                 <button type="button" onClick={() => setMCategories(v => !v)}

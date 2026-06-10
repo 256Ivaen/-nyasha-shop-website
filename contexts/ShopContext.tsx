@@ -15,6 +15,9 @@ export interface Product {
   subCategory?: string
   sizes?: string[]
   bestseller?: boolean
+  new_arrival?: boolean
+  discounted?: boolean
+  discount_price?: number
   date?: number
 }
 

@@ -31,7 +31,7 @@ export default function HomePage() {
         title="Best Sellers"
         subtitle="Most loved by our customers"
         bestsellersOnly
-        viewAllHref="/collection?filter=bestseller"
+        viewAllHref="/bestsellers"
         limit={10}
       />
 
