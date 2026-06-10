@@ -17,7 +17,11 @@ export default function VerifyPayment() {
     const verify = async () => {
       if (!token) return
       try {
-        const res = await axios.post(backendUrl + '/api/verify-stripe.php', { success, orderId }, { headers: { token } })
+        const res = await axios.put(
+          backendUrl + `/api/v1/admin/orders/${orderId}/payment`,
+          { payment_status: success === 'true' ? 'paid' : 'failed' },
+          { headers: { Authorization: `Bearer ${token}` } },
+        )
         if (res.data.success) {
           setCartItems({})
           navigate.push('/orders')

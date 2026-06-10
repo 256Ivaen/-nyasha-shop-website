@@ -25,6 +25,12 @@ export interface UserData {
   id: string
   name: string
   email: string
+  first_name?: string
+  last_name?: string
+  phone?: string
+  street?: string
+  city?: string
+  country?: string
 }
 
 export interface CartItems {
@@ -84,6 +90,10 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   const [userData, setUserData] = useState<UserData | null>(null)
   const navigate = useRouter()
 
+  const authHeaders = (t?: string) => ({
+    Authorization: `Bearer ${t ?? token}`,
+  })
+
   const addToCart = async (itemId: string, size = 'default') => {
     if (!itemId) return
     const itemIdStr = String(itemId)
@@ -93,11 +103,14 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
     setCartItems(cartData)
     if (token) {
       try {
-        await axios.post(backendUrl + '/api/add-to-cart.php', { itemId, size }, { headers: { token } })
+        await axios.post(
+          backendUrl + '/api/v1/user/cart',
+          { cartData },
+          { headers: authHeaders() },
+        )
       } catch (error: unknown) {
         const err = error as { response?: { data?: { message?: string } } }
-        toast.error(err.response?.data?.message ?? 'Failed to add item to cart')
-        return
+        toast.error(err.response?.data?.message ?? 'Failed to sync cart')
       }
     }
     toast.success('Product added to cart successfully!')
@@ -126,7 +139,11 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
     setCartItems(cartData)
     if (token) {
       try {
-        await axios.post(backendUrl + '/api/update-cart.php', { itemId, size, quantity }, { headers: { token } })
+        await axios.post(
+          backendUrl + '/api/v1/user/cart',
+          { cartData },
+          { headers: authHeaders() },
+        )
       } catch (error: unknown) {
         const err = error as { response?: { data?: { message?: string } } }
         toast.error(err.response?.data?.message ?? 'Failed to update cart')
@@ -146,7 +163,6 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
     return total
   }
 
-  // Format a price using Intl — backend already converted the amount
   const displayPrice = (amount: number): string => {
     if (!currency) return amount.toLocaleString()
     try {
@@ -170,7 +186,6 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
       if (res.data.success) {
         const mapped = res.data.products.map((p: Product & { id?: string }) => ({ ...p, _id: String(p.id ?? p._id) })).reverse()
         setProducts(mapped)
-        // Let the backend tell us which currency it used
         if (res.data.currency) setCurrencyLocal(res.data.currency)
       } else {
         toast.error(res.data.message ?? 'Failed to fetch products')
@@ -184,19 +199,16 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
 
   const getUserCart = async (t: string) => {
     try {
-      const res = await axios.post(backendUrl + '/api/get-cart.php', {}, { headers: { token: t } })
-      if (res.data.success) setCartItems(res.data.cartData)
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } }
-      toast.error(err.response?.data?.message ?? 'Failed to fetch cart')
-    }
+      const res = await axios.get(backendUrl + '/api/v1/user/cart', { headers: authHeaders(t) })
+      if (res.data.success) setCartItems(res.data.cartData ?? {})
+    } catch { /* silent — user may not be logged in */ }
   }
 
   const getUserData = async (t: string) => {
     try {
-      const res = await axios.post(backendUrl + '/api/get-user-details.php', {}, { headers: { token: t } })
+      const res = await axios.get(backendUrl + '/api/v1/auth/me', { headers: authHeaders(t) })
       if (res.data.success) {
-        setUserData(res.data.user)
+        setUserData(res.data.data?.user ?? res.data.user ?? null)
       } else {
         toast.error(res.data.message ?? 'Failed to fetch user data')
       }
@@ -209,8 +221,8 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   const getUserProfile = async () => {
     if (!token) return null
     try {
-      const res = await axios.post(backendUrl + '/api/get-user-profile.php', {}, { headers: { token } })
-      return res.data.success ? res.data.profile : null
+      const res = await axios.get(backendUrl + '/api/v1/user/profile', { headers: authHeaders() })
+      return res.data.success ? (res.data.user ?? res.data.data?.user ?? null) : null
     } catch {
       return null
     }
@@ -219,7 +231,7 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   const updateUserProfile = async (profileData: unknown) => {
     if (!token) return { success: false, message: 'No authentication token' }
     try {
-      const res = await axios.post(backendUrl + '/api/update-user-profile.php', profileData, { headers: { token } })
+      const res = await axios.put(backendUrl + '/api/v1/user/profile', profileData, { headers: authHeaders() })
       if (res.data.success) {
         toast.success('Profile updated successfully!')
         getUserData(token)
@@ -244,9 +256,11 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
 
   const login = async (email: string, password: string) => {
     try {
-      const res = await axios.post(backendUrl + '/api/login.php', { email, password })
+      const res = await axios.post(backendUrl + '/api/v1/auth/login', { email, password })
       if (res.data.success) {
-        const { token: t, user } = res.data
+        const payload = res.data.data ?? res.data
+        const t = payload.token
+        const user = payload.user
         setToken(t)
         setUserData(user)
         if (typeof window !== 'undefined') localStorage.setItem('token', t)
@@ -265,9 +279,11 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
 
   const register = async (name: string, email: string, password: string) => {
     try {
-      const res = await axios.post(backendUrl + '/api/register.php', { name, email, password })
+      const res = await axios.post(backendUrl + '/api/v1/auth/register', { name, email, password })
       if (res.data.success) {
-        const { token: t, user } = res.data
+        const payload = res.data.data ?? res.data
+        const t = payload.token
+        const user = payload.user
         setToken(t)
         setUserData(user)
         if (typeof window !== 'undefined') localStorage.setItem('token', t)
@@ -285,7 +301,6 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   }
 
   useEffect(() => {
-    // Pass saved pref to backend if any, otherwise let backend decide
     const saved = typeof window !== 'undefined' ? localStorage.getItem('sn_preferred_currency') : null
     if (saved) setCurrencyLocal(saved)
     getProductsData(saved ?? undefined)

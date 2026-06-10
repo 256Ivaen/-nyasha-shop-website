@@ -2,7 +2,6 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
-import { useCurrency } from '@/contexts/CurrencyContext'
 import Title from '@/components/Title'
 import axios from 'axios'
 import { toast } from 'sonner'
@@ -11,7 +10,8 @@ import Image from 'next/image'
 import Button from '@/components/Button'
 
 interface OrderItem {
-  _id: string
+  id?: string
+  _id?: string
   name: string
   price: number
   quantity: number
@@ -20,29 +20,41 @@ interface OrderItem {
 }
 
 interface Order {
-  _id: string
+  id: string
   items: OrderItem[]
   amount: number
   status: string
-  paymentMethod: string
+  payment_method: string
   payment: boolean
+  payment_status?: string
   date: string | number
+  created_at?: string
+}
+
+const STATUS_STYLES: Record<string, string> = {
+  'Delivered':        'bg-green-100 text-green-700',
+  'Cancelled':        'bg-red-100 text-red-700',
+  'Out for delivery': 'bg-blue-100 text-blue-700',
+  'Shipped':          'bg-indigo-100 text-indigo-700',
+  'Packing':          'bg-purple-100 text-purple-700',
+  'Order Placed':     'bg-yellow-100 text-yellow-700',
 }
 
 export default function OrdersPage() {
   const ctx = useContext(ShopContext)!
-  const { backendUrl, token, navigate } = ctx
-  const { formatAmount } = useCurrency()
-  const [orderData, setOrderData] = useState<Order[]>([])
+  const { backendUrl, token, navigate, displayPrice } = ctx
+  const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!token) { navigate.push('/login'); return }
     const load = async () => {
       try {
-        const res = await axios.post(backendUrl + '/api/user-orders.php', {}, { headers: { token } })
+        const res = await axios.get(backendUrl + '/api/v1/orders/my', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         if (res.data.success) {
-          setOrderData(res.data.orders.reverse())
+          setOrders([...(res.data.orders ?? [])].reverse())
         } else {
           toast.error('Failed to load orders')
         }
@@ -56,57 +68,109 @@ export default function OrdersPage() {
   }, [token])
 
   if (loading) {
-    return <div className="pt-14 flex items-center justify-center min-h-[400px]">
-      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
+    return (
+      <div className="pt-14 pb-16">
+        <div className="text-xs mb-6"><Title text1="MY" text2="ORDERS" /></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-gray-100 animate-pulse rounded-xl h-48" />
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="pt-14 pb-16">
-      <div className="text-xs mb-6">
-        <Title text1="MY" text2="ORDERS" />
-      </div>
+      <div className="text-xs mb-6"><Title text1="MY" text2="ORDERS" /></div>
 
-      {orderData.length === 0 ? (
+      {orders.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-gray-500 text-xs mb-4">You have no orders yet</p>
+          <p className="text-gray-500 text-sm mb-4">You have no orders yet</p>
           <Button onClick={() => navigate.push('/collection')}>Start Shopping</Button>
         </div>
       ) : (
-        <motion.div className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          {orderData.map(order => (
-            <div key={order._id} className="bg-white border border-gray-200 rounded-xl p-6">
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                <div>
-                  <p className="text-xs text-gray-500">Order ID: {order._id}</p>
-                  <p className="text-xs font-semibold text-gray-900 mt-1">{formatAmount(order.amount ?? 0)}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 text-xs rounded-full font-medium ${
-                    order.status === 'Delivered' ? 'bg-primary-subtle text-primary' :
-                    order.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
-                    'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {order.status}
-                  </span>
-                  <span className="text-xs text-gray-500">{order.paymentMethod}</span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {order.items?.map((item, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    {item.image?.[0] && (
-                      <Image src={item.image[0]} alt={item.name} width={48} height={48} className="rounded-lg object-cover" />
-                    )}
-                    <div>
-                      <p className="text-xs font-medium text-gray-900">{item.name}</p>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity} {item.size !== 'default' ? `• ${item.size}` : ''} • {formatAmount(item.price ?? 0)}</p>
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          {orders.map(order => {
+            const statusStyle = STATUS_STYLES[order.status] ?? 'bg-gray-100 text-gray-700'
+            const date = order.created_at
+              ? new Date(order.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+              : typeof order.date === 'number'
+                ? new Date(order.date * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+                : ''
+
+            return (
+              <motion.div
+                key={order.id}
+                className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Product image strip */}
+                <div className="flex gap-1 p-3 pb-0">
+                  {order.items?.slice(0, 3).map((item, i) => (
+                    <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-50 shrink-0 border border-gray-100">
+                      {item.image?.[0] ? (
+                        <Image src={item.image[0]} alt={item.name} fill className="object-cover" sizes="64px" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">?</div>
+                      )}
                     </div>
+                  ))}
+                  {(order.items?.length ?? 0) > 3 && (
+                    <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-semibold shrink-0">
+                      +{order.items.length - 3}
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="p-3 flex flex-col flex-grow gap-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-gray-400 font-mono truncate">#{order.id.slice(0, 8).toUpperCase()}</p>
+                      <p className="text-sm font-bold text-gray-900 mt-0.5">{displayPrice(order.amount ?? 0)}</p>
+                    </div>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${statusStyle}`}>
+                      {order.status}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
+
+                  <div className="text-[11px] text-gray-500 space-y-0.5">
+                    <p>{order.items?.length ?? 0} item{(order.items?.length ?? 0) !== 1 ? 's' : ''} · {order.payment_method?.replace(/_/g, ' ')}</p>
+                    {date && <p>{date}</p>}
+                  </div>
+
+                  <div className="flex items-center gap-1.5 mt-auto pt-1">
+                    <span className={`w-1.5 h-1.5 rounded-full ${order.payment || order.payment_status === 'paid' ? 'bg-green-400' : 'bg-yellow-400'}`} />
+                    <span className="text-[10px] text-gray-500">
+                      {order.payment || order.payment_status === 'paid' ? 'Paid' : 'Payment pending'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Items list */}
+                {order.items && order.items.length > 0 && (
+                  <div className="border-t border-gray-100 px-3 py-2 space-y-1">
+                    {order.items.map((item, i) => (
+                      <div key={i} className="flex items-center justify-between text-[11px] text-gray-600">
+                        <span className="truncate max-w-[60%]">{item.name}</span>
+                        <span className="text-gray-400 shrink-0 ml-2">
+                          x{item.quantity}{item.size && item.size !== 'default' ? ` · ${item.size}` : ''}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )
+          })}
         </motion.div>
       )}
     </div>
