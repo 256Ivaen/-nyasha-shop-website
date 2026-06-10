@@ -14,22 +14,21 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      {/* Hero — full-width, flush under navbar */}
+      {/* ── 1. HERO — full-width, bleeds under navbar ─────────────────────── */}
       <div className="-mt-36 lg:-mt-44">
         <Hero />
       </div>
 
-      {/* Amazon-style category pods (Comfy styles for her, for him, dog section, etc.)
-          Managed entirely from Admin → Featured Sections with background removal */}
+      {/* ── 2. CATEGORY PODS — 4 across, tight below hero ────────────────── */}
       <CategoryPodsSection />
 
-      {/* Promo banner carousel */}
+      {/* ── 3. PROMO BANNERS — 2 side by side ────────────────────────────── */}
       <PromoBannerStrip />
 
-      {/* Latest arrivals grid */}
+      {/* ── 4. LATEST ARRIVALS — product grid ────────────────────────────── */}
       <LatestCollection />
 
-      {/* Best Sellers horizontal scroll */}
+      {/* ── 5. BEST SELLERS — horizontal scroll ──────────────────────────── */}
       <CategoryProductRow
         title="Best Sellers"
         subtitle="Most loved by our customers"
@@ -38,7 +37,10 @@ export default function HomePage() {
         limit={10}
       />
 
-      {/* Eva Cosmetics horizontal scroll */}
+      {/* ── 6. SECOND PROMO PAIR — "Comfy styles" style, deeper on page ─── */}
+      <PromoBannerStrip />
+
+      {/* ── 7. CATEGORY ROWS ─────────────────────────────────────────────── */}
       <CategoryProductRow
         title="Eva Cosmetics"
         subtitle="Premium skincare & beauty"
@@ -47,7 +49,6 @@ export default function HomePage() {
         limit={8}
       />
 
-      {/* Detergents horizontal scroll */}
       <CategoryProductRow
         title="Detergents & Cleaning"
         subtitle="Trusted brands for a clean home"
@@ -56,7 +57,7 @@ export default function HomePage() {
         limit={8}
       />
 
-      {/* Trust badges + full bestseller section */}
+      {/* ── 8. TRUST BADGES + BESTSELLER GRID ───────────────────────────── */}
       <BestSeller />
     </>
   )

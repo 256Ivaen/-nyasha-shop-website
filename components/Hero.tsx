@@ -45,9 +45,9 @@ export default function Hero() {
     const fetchHeroes = async () => {
       try {
         if (!backendUrl) { setLoading(false); return }
-        const res = await axios.get(backendUrl + '/api/list-heroes.php')
+        const res = await axios.get(backendUrl + '/api/v1/heroes/active')
         if (res.data.success) {
-          setHeroes(res.data.heroes.filter((h: HeroItem) => h.active))
+          setHeroes(res.data.heroes ?? [])
         }
       } catch { /* no heroes */ }
       setLoading(false)
