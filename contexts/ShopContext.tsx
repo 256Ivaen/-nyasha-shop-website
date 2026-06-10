@@ -33,7 +33,6 @@ export interface CartItems {
 interface ShopContextValue {
   products: Product[]
   currency: string
-  conversionRate: number
   displayPrice: (ugxAmount: number) => string
   delivery_fee: number
   search: string
@@ -70,8 +69,7 @@ export function useShop() {
 }
 
 export default function ShopContextProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrencyLocal]         = useState('GBP')
-  const [conversionRate, setConversionRate]  = useState(1.0)
+  const [currency, setCurrencyLocal] = useState('')
   const [currencyLoading, setCurrencyLoading] = useState(false)
   const delivery_fee = 5000
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
@@ -145,48 +143,37 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
     return total
   }
 
-  const NO_DECIMALS = new Set(['UGX','TZS','RWF','NGN','KES','BIF','GNF','MGA','CLP','PYG','VND','KRW','JPY','IDR'])
-
-  const displayPrice = (ugxAmount: number): string => {
-    const converted = ugxAmount * conversionRate
-    if (NO_DECIMALS.has(currency)) {
-      return `${currency} ${Math.round(converted).toLocaleString()}`
+  // Format a price using Intl — backend already converted the amount
+  const displayPrice = (amount: number): string => {
+    if (!currency) return amount.toLocaleString()
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency,
+        maximumFractionDigits: amount >= 100 ? 0 : 2,
+      }).format(amount)
+    } catch {
+      return `${currency} ${amount.toLocaleString()}`
     }
-    return `${currency} ${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   }
 
-  const getProductsData = async () => {
+  const getProductsData = async (currencyCode?: string) => {
+    setCurrencyLoading(true)
     try {
       const deviceToken = typeof window !== 'undefined' ? localStorage.getItem('sn_device_token') ?? '' : ''
-      const res = await axios.get(backendUrl + '/api/v1/products', {
-        headers: { 'X-Device-Token': deviceToken },
-      })
+      const headers: Record<string, string> = { 'X-Device-Token': deviceToken }
+      if (currencyCode) headers['X-Currency'] = currencyCode
+      const res = await axios.get(backendUrl + '/api/v1/products', { headers })
       if (res.data.success) {
         const mapped = res.data.products.map((p: Product & { id?: string }) => ({ ...p, _id: String(p.id ?? p._id) })).reverse()
         setProducts(mapped)
+        // Let the backend tell us which currency it used
+        if (res.data.currency) setCurrencyLocal(res.data.currency)
       } else {
         toast.error(res.data.message ?? 'Failed to fetch products')
       }
     } catch {
       toast.error('Failed to fetch products')
-    }
-  }
-
-  const fetchConversionRate = async (toCurrency: string) => {
-    const BASE = 'UGX'
-    if (toCurrency === BASE) { setConversionRate(1.0); setCurrencyLoading(false); return }
-    setCurrencyLoading(true)
-    try {
-      const res = await axios.post(backendUrl + '/api/v1/exchange/convert', {
-        amount: 1,
-        from: BASE,
-        to: toCurrency,
-      })
-      if (res.data.success) {
-        setConversionRate(res.data.data.amount ?? 1.0)
-      }
-    } catch {
-      // keep existing rate on failure
     } finally {
       setCurrencyLoading(false)
     }
@@ -295,17 +282,16 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   }
 
   useEffect(() => {
+    // Pass saved pref to backend if any, otherwise let backend decide
     const saved = typeof window !== 'undefined' ? localStorage.getItem('sn_preferred_currency') : null
-    const initial = saved ?? 'GBP'
-    setCurrencyLocal(initial)
-    getProductsData()
-    fetchConversionRate(initial)
+    if (saved) setCurrencyLocal(saved)
+    getProductsData(saved ?? undefined)
 
     const handleCurrencyChange = (e: Event) => {
       const code = (e as CustomEvent<string>).detail
       if (code) {
         setCurrencyLocal(code)
-        fetchConversionRate(code)
+        getProductsData(code)
       }
     }
     window.addEventListener('sn-currency-change', handleCurrencyChange)
@@ -330,7 +316,7 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   return (
     <ShopContext.Provider
       value={{
-        products, currency, conversionRate, displayPrice, currencyLoading, delivery_fee,
+        products, currency, displayPrice, currencyLoading, delivery_fee,
         search, setSearch, showSearch, setShowSearch,
         cartItems, addToCart, setCartItems,
         getCartCount, updateQuantity,

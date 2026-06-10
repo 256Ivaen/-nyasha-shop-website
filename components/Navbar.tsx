@@ -10,7 +10,6 @@ import { toast } from 'sonner'
 import { ShopContext } from '@/contexts/ShopContext'
 import { useContext } from 'react'
 import { assets } from '@/assets/assets'
-import { ANNOUNCEMENTS } from '@/assets/content'
 import CurrencySelector from '@/components/CurrencySelector'
 import axios from 'axios'
 
@@ -44,8 +43,8 @@ function isActive(pathname: string, href: string) {
 // ── Desktop dropdown ─────────────────────────────────────────────────────────
 type DropItem = { label: string; href: string; desc?: string }
 
-function NavDropdown({ label, items, open, onEnter, onLeave }: {
-  label: string; items: DropItem[]; open: boolean
+function NavDropdown({ label, items, open, onEnter, onLeave, loading }: {
+  label: string; items: DropItem[]; open: boolean; loading?: boolean
   onEnter: () => void; onLeave: () => void
 }) {
   return (
@@ -69,19 +68,32 @@ function NavDropdown({ label, items, open, onEnter, onLeave }: {
             transition={{ duration: 0.15, ease: 'easeOut' }}
             className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-52 bg-white border border-edge rounded-2xl overflow-hidden p-1 z-50"
           >
-            {items.map(item => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex items-start justify-between px-4 py-2.5 rounded-xl hover:bg-primary-subtle transition-colors group"
-              >
-                <div>
-                  <p className="text-xs font-semibold text-ink group-hover:text-primary transition-colors">{item.label}</p>
-                  {item.desc && <p className="text-[10px] text-ink-light mt-0.5">{item.desc}</p>}
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="px-4 py-2.5 rounded-xl">
+                  <div className="h-3 bg-gray-100 rounded animate-pulse w-3/4" />
                 </div>
-                <ChevronRight size={11} className="text-edge-dark group-hover:text-primary transition-colors mt-0.5 flex-shrink-0" />
+              ))
+            ) : items.length > 0 ? (
+              items.map(item => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-start justify-between px-4 py-2.5 rounded-xl hover:bg-primary-subtle transition-colors group"
+                >
+                  <div>
+                    <p className="text-xs font-semibold text-ink group-hover:text-primary transition-colors">{item.label}</p>
+                    {item.desc && <p className="text-[10px] text-ink-light mt-0.5">{item.desc}</p>}
+                  </div>
+                  <ChevronRight size={11} className="text-edge-dark group-hover:text-primary transition-colors mt-0.5 flex-shrink-0" />
+                </Link>
+              ))
+            ) : (
+              <Link href="/collection" className="flex items-center justify-between px-4 py-2.5 rounded-xl hover:bg-primary-subtle transition-colors group">
+                <p className="text-xs font-semibold text-ink group-hover:text-primary">All Products</p>
+                <ChevronRight size={11} className="text-edge-dark group-hover:text-primary" />
               </Link>
-            ))}
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -102,13 +114,21 @@ export default function Navbar() {
   const [annoIdx,      setAnnoIdx]      = useState(0)
 
   // Dynamic categories from backend
-  const [categoryLinks, setCategoryLinks] = useState<DropItem[]>([])
+  const [categoryLinks,    setCategoryLinks]    = useState<DropItem[]>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
+  const [announcements, setAnnouncements] = useState<string[]>([])
 
   // Mobile accordion state
   const [mShop,       setMShop]       = useState(false)
   const [mCategories, setMCategories] = useState(false)
   const [mInfo,       setMInfo]       = useState(false)
   const [mAccount,    setMAccount]    = useState(false)
+
+  useEffect(() => {
+    axios.get(`${BACKEND}/api/v1/announcements`)
+      .then(r => { if (Array.isArray(r.data.announcements)) setAnnouncements(r.data.announcements) })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     axios.get(`${BACKEND}/api/v1/categories`)
@@ -123,6 +143,7 @@ export default function Navbar() {
         })))
       })
       .catch(() => {})
+      .finally(() => setCategoriesLoading(false))
   }, [])
 
   useEffect(() => {
@@ -178,20 +199,22 @@ export default function Navbar() {
       <header className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300`}>
 
         {/* ── Announcement Bar ───────────────────────────────────────── */}
-        <div className="bg-primary text-primary-foreground text-xs text-center py-2 px-4 overflow-hidden">
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={annoIdx}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.25 }}
-              className="font-medium tracking-wide"
-            >
-              {ANNOUNCEMENTS[annoIdx]}
-            </motion.span>
-          </AnimatePresence>
-        </div>
+        {announcements.length > 0 && (
+          <div className="bg-primary text-primary-foreground text-xs text-center py-2 px-4 overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={annoIdx}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.25 }}
+                className="font-medium tracking-wide"
+              >
+                {announcements[annoIdx % announcements.length]}
+              </motion.span>
+            </AnimatePresence>
+          </div>
+        )}
 
         {/* ── Main header ────────────────────────────────────────────── */}
         <div className={`bg-white transition-all duration-300 ${scrolled ? 'border-b border-edge' : ''}`}>
@@ -226,15 +249,14 @@ export default function Navbar() {
               >
                 All Products
               </Link>
-              {categoryLinks.length > 0 && (
-                <NavDropdown
-                  label="Categories"
-                  items={categoryLinks}
-                  open={openDropdown === 'categories'}
-                  onEnter={() => open('categories')}
-                  onLeave={close}
-                />
-              )}
+              <NavDropdown
+                label="Categories"
+                items={categoryLinks}
+                loading={categoriesLoading}
+                open={openDropdown === 'categories'}
+                onEnter={() => open('categories')}
+                onLeave={close}
+              />
               <NavDropdown
                 label="Info"
                 items={infoLinks}
@@ -410,19 +432,30 @@ export default function Navbar() {
                 </Link>
 
                 {/* Categories accordion */}
-                {categoryLinks.length > 0 && (
-                  <>
-                    <button type="button" onClick={() => setMCategories(v => !v)}
-                      className="flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold text-ink hover:bg-primary-subtle w-full">
-                      Categories <ChevronDown size={13} className={`transition-transform ${mCategories ? 'rotate-180' : ''}`} />
-                    </button>
-                    {mCategories && categoryLinks.map(l => (
+                <button type="button" onClick={() => setMCategories(v => !v)}
+                  className="flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold text-ink hover:bg-primary-subtle w-full">
+                  Categories <ChevronDown size={13} className={`transition-transform ${mCategories ? 'rotate-180' : ''}`} />
+                </button>
+                {mCategories && (
+                  categoriesLoading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="px-6 py-2.5 rounded-xl">
+                        <div className="h-3 bg-gray-100 rounded animate-pulse w-1/2" />
+                      </div>
+                    ))
+                  ) : categoryLinks.length > 0 ? (
+                    categoryLinks.map(l => (
                       <Link key={l.label} href={l.href} onClick={() => setMobileOpen(false)}
                         className="flex items-center justify-between px-6 py-2.5 rounded-xl text-xs font-medium text-ink-muted hover:text-primary hover:bg-primary-subtle transition-colors">
                         <span>{l.label}</span><ChevronRight size={11} />
                       </Link>
-                    ))}
-                  </>
+                    ))
+                  ) : (
+                    <Link href="/collection" onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-between px-6 py-2.5 rounded-xl text-xs font-medium text-ink-muted hover:text-primary hover:bg-primary-subtle transition-colors">
+                      <span>All Products</span><ChevronRight size={11} />
+                    </Link>
+                  )
                 )}
 
                 {/* Info accordion */}

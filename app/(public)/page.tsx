@@ -19,14 +19,12 @@ export default function HomePage() {
         <Hero />
       </div>
 
-      {/* ── 2. CATEGORY PODS — 4 across, tight below hero ────────────────── */}
       <CategoryPodsSection />
-
-      {/* ── 3. PROMO BANNERS — 2 side by side ────────────────────────────── */}
-      <PromoBannerStrip />
 
       {/* ── 4. LATEST ARRIVALS — product grid ────────────────────────────── */}
       <LatestCollection />
+
+      <PromoBannerStrip />
 
       {/* ── 5. BEST SELLERS — horizontal scroll ──────────────────────────── */}
       <CategoryProductRow
@@ -36,9 +34,6 @@ export default function HomePage() {
         viewAllHref="/collection?filter=bestseller"
         limit={10}
       />
-
-      {/* ── 6. SECOND PROMO PAIR — "Comfy styles" style, deeper on page ─── */}
-      <PromoBannerStrip />
 
       {/* ── 7. CATEGORY ROWS ─────────────────────────────────────────────── */}
       <CategoryProductRow

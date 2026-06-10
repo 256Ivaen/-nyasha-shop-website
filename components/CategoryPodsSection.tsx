@@ -42,7 +42,7 @@ function Pod({ section, products }: { section: Section; products: Product[] }) {
   const grid: (Product | null)[] = [...catProducts, ...Array(Math.max(0, 4 - catProducts.length)).fill(null)]
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+    <div className="bg-white rounded-xl border border-black shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden max-h-[220px]">
       {/* Title */}
       <div className="px-3 pt-3 pb-1.5">
         <h3 className="font-extrabold text-gray-900 text-sm leading-tight">{section.title}</h3>
@@ -51,69 +51,52 @@ function Pod({ section, products }: { section: Section; products: Product[] }) {
         )}
       </div>
 
-      {/* Content: feature image OR 2×2 product grid */}
-      {section.image ? (
-        <Link href={href} className="mx-2.5 mb-1 block">
+      {/* Content: feature image OR 2×2 product grid — fills remaining card height */}
+      <Link href={href} className="flex-1 block overflow-hidden">
+        {section.image ? (
           <div
-            className="rounded-lg overflow-hidden flex items-center justify-center h-36 bg-gray-100"
+            className="w-full h-full min-h-36 overflow-hidden"
             // eslint-disable-next-line react/forbid-dom-props
             {...(section.bg_color ? { style: { background: section.bg_color } } : {})}
           >
             <img
               src={imgUrl(section.image)!}
               alt={section.title}
-              className="max-h-full max-w-full object-contain p-2 hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             />
           </div>
-        </Link>
-      ) : (
-        <div className="grid grid-cols-2 gap-0.5 mx-2.5 mb-1">
-          {grid.map((p, i) => (
-            <Link
-              key={p?._id ?? `empty-${i}`}
-              href={p ? `/product?id=${p._id}` : href}
-              className="aspect-square rounded-md overflow-hidden bg-gray-50 block"
-            >
-              {p?.image?.[0] ? (
-                <img
-                  src={imgUrl(p.image[0]) ?? ''}
-                  alt={p.name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-100" />
-              )}
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* See more */}
-      <div className="px-3 pb-3 mt-auto">
-        <Link
-          href={href}
-          className="text-[11px] font-semibold text-primary hover:underline"
-        >
-          See more →
-        </Link>
-      </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-0.5 h-full">
+            {grid.map((p, i) => (
+              <div key={p?._id ?? `empty-${i}`} className="overflow-hidden bg-gray-50">
+                {p?.image?.[0] ? (
+                  <img
+                    src={imgUrl(p.image[0]) ?? ''}
+                    alt={p.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-100" />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </Link>
     </div>
   )
 }
 
 function PodSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col overflow-hidden">
+    <div className="bg-white rounded-xl border border-black shadow-sm flex flex-col overflow-hidden max-h-[220px]">
       <div className="px-3 pt-3 pb-1.5">
         <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
       </div>
-      <div className="grid grid-cols-2 gap-0.5 mx-2.5 mb-1">
+      <div className="grid grid-cols-2 gap-0.5 flex-1 min-h-36">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="aspect-square bg-gray-100 rounded-md animate-pulse" />
+          <div key={i} className="bg-gray-100 animate-pulse" />
         ))}
-      </div>
-      <div className="px-3 pb-3">
-        <div className="h-3 w-14 bg-gray-100 rounded animate-pulse" />
       </div>
     </div>
   )

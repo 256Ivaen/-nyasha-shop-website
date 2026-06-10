@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { ShopContext } from '@/contexts/ShopContext'
 import ProductItem from '@/components/ProductItem'
+import Button from '@/components/Button'
 import type { Product } from '@/contexts/ShopContext'
 
 interface Props {
@@ -68,8 +69,8 @@ export default function CategoryProductRow({ title, subtitle, category, subCateg
           >
             <ChevronRight size={14} />
           </button>
-          <Link href={href} className="text-xs font-semibold text-primary hover:underline ml-1">
-            See all →
+          <Link href={href}>
+            <Button variant="outline" size="lg">View All</Button>
           </Link>
         </div>
       </div>

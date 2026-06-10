@@ -13,6 +13,9 @@ interface HeroItem {
   title: string
   description?: string
   link?: string
+  overlay_text?: string
+  button_text?: string
+  button_link?: string
   active: boolean
   desktop_image?: string
   tablet_image?: string
@@ -117,6 +120,23 @@ export default function Hero() {
 
       {/* Dark overlay for readability */}
       <div className="absolute inset-0 bg-black/20" />
+
+      {/* ── Overlay text + CTA button ──────────────────────────────── */}
+      {heroes[currentIndex]?.overlay_text && (
+        <div className="absolute bottom-12 left-0 right-0 z-10 px-6 sm:px-10 flex items-end justify-between gap-4 pointer-events-none">
+          <p className="text-white text-base sm:text-xl font-semibold leading-snug drop-shadow max-w-[55%]">
+            {heroes[currentIndex].overlay_text}
+          </p>
+          {heroes[currentIndex].button_text && heroes[currentIndex].button_link && (
+            <a
+              href={heroes[currentIndex].button_link}
+              className="pointer-events-auto shrink-0 bg-white text-black text-xs sm:text-sm font-bold px-5 py-2.5 rounded-full hover:bg-white/90 transition-colors shadow-lg"
+            >
+              {heroes[currentIndex].button_text}
+            </a>
+          )}
+        </div>
+      )}
 
       {/* ── Prev / Next arrows ─────────────────────────────────────── */}
       {heroes.length > 1 && (

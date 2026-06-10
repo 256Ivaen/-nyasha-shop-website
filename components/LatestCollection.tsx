@@ -24,10 +24,15 @@ export default function LatestCollection() {
 
   return (
     <section className="py-5 lg:py-10">
-      <motion.div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12"
+      <motion.div className="flex items-center justify-between mb-8 sm:mb-12"
         initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-        <Title text1="LATEST" text2="ARRIVALS" />
-        <p className="text-gray-500 text-xs mt-3">Fresh new products added to our collection — be the first to shop them.</p>
+        <div>
+          <Title text1="LATEST" text2="ARRIVALS" alignment="left" />
+          <p className="text-gray-500 text-xs mt-1">Fresh new products added to our collection — be the first to shop them.</p>
+        </div>
+        <Link href="/collection" className="shrink-0 ml-4">
+          <Button variant="outline" size="lg">VIEW ALL PRODUCTS</Button>
+        </Link>
       </motion.div>
 
       {isLoading ? (
@@ -47,11 +52,6 @@ export default function LatestCollection() {
         <p className="text-center text-gray-400 py-12">No products available yet.</p>
       )}
 
-      <div className="text-center mt-10">
-        <Link href="/collection">
-          <Button variant="outline" size="lg">VIEW ALL PRODUCTS</Button>
-        </Link>
-      </div>
     </section>
   )
 }

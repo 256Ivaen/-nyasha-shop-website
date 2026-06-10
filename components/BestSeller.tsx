@@ -29,13 +29,10 @@ export default function BestSeller() {
 
   return (
     <section className="py-5 lg:py-10">
-      <div className="relative flex items-center justify-center mb-8">
-        <div className="absolute left-0 right-0 h-px bg-gray-200" />
-        <div className="relative bg-white px-4">
-          <Title text1="BEST" text2="SELLERS" />
-        </div>
+      <div className="mb-4">
+        <Title text1="BEST" text2="SELLERS" alignment="left" />
+        <p className="text-gray-500 text-xs mt-1">Our most loved products. Trusted by thousands of customers.</p>
       </div>
-      <p className="text-center text-gray-500 text-xs mb-10">Our most loved products. Trusted by thousands of customers.</p>
 
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
