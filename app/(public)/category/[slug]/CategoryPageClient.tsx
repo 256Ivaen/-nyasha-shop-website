@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
+import { useStockLocation } from '@/contexts/StockLocationContext'
 import ProductItem from '@/components/ProductItem'
 import Pagination from '@/components/Pagination'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -14,6 +15,7 @@ interface Props { slug: string }
 export default function CategoryPageClient({ slug }: Props) {
   const ctx = useContext(ShopContext)!
   const { products, search, showSearch } = ctx
+  const { stockLocation } = useStockLocation()
 
   const [filtered,     setFiltered]     = useState<Product[]>([])
   const [sortType,     setSortType]     = useState('relevant')
@@ -30,6 +32,7 @@ export default function CategoryPageClient({ slug }: Props) {
       p.category?.toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase() ||
       p.subCategory?.toLowerCase() === categoryName.toLowerCase()
     )
+    if (stockLocation !== 'all') list = list.filter(p => (p.stock_location ?? 'UK') === stockLocation)
     if (showSearch && search) {
       list = list.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     }
@@ -39,7 +42,7 @@ export default function CategoryPageClient({ slug }: Props) {
     setFiltered(list)
     setCurrentPage(1)
     setTimeout(() => setLoading(false), 200)
-  }, [products, slug, categoryName, sortType, search, showSearch])
+  }, [products, slug, categoryName, sortType, search, showSearch, stockLocation])
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
   const pageItems  = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
