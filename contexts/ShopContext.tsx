@@ -306,10 +306,35 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   }
 
   useEffect(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('sn_preferred_currency') : null
-    if (saved) setCurrencyLocal(saved)
-    getProductsData(saved ?? undefined)
+    const PREF_KEY   = 'sn_preferred_currency'
+    const BACKEND    = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
+    const API        = `${BACKEND}/api/v1`
 
+    // Resolve currency once — saved preference wins, otherwise detect from IP via backend.
+    // Only then fetch products so there is never a GBP→UGX flash.
+    const resolveCurrency = async (): Promise<string> => {
+      const saved = localStorage.getItem(PREF_KEY)
+      if (saved) return saved
+
+      try {
+        const r = await fetch(`${API}/exchange/detect-currency`, { signal: AbortSignal.timeout(5000) })
+        if (r.ok) {
+          const d = await r.json()
+          if (d.success && d.currency) {
+            localStorage.setItem(PREF_KEY, d.currency)
+            return d.currency
+          }
+        }
+      } catch {}
+      return 'GBP'
+    }
+
+    resolveCurrency().then(code => {
+      setCurrencyLocal(code)
+      getProductsData(code)
+    })
+
+    // Re-fetch when user manually changes currency
     const handleCurrencyChange = (e: Event) => {
       const code = (e as CustomEvent<string>).detail
       if (code) {

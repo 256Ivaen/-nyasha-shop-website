@@ -42,18 +42,6 @@ function generateDeviceToken(): string {
 
 // Country code → ISO currency code mapping (most common countries)
 
-async function detectCurrencyFromIP(): Promise<string | undefined> {
-  try {
-    // Use our own backend as proxy — avoids CORS and 403 from direct browser requests to ipapi.co
-    const r = await fetch(`${API}/exchange/detect-currency`, { signal: AbortSignal.timeout(5000) })
-    if (!r.ok) return undefined
-    const d = await r.json()
-    return d.success && d.currency ? (d.currency as string) : undefined
-  } catch {
-    return undefined
-  }
-}
-
 // Currencies that display as whole numbers (no decimals)
 const NO_DECIMALS = new Set(['UGX', 'TZS', 'RWF', 'NGN', 'KES', 'BIF', 'GNF', 'MGA', 'CLP', 'PYG', 'VND', 'KRW', 'JPY', 'IDR'])
 
@@ -80,7 +68,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
     const saved = localStorage.getItem(PREF_KEY)
 
-    const currenciesPromise = fetch(`${API}/exchange/currencies`)
+    fetch(`${API}/exchange/currencies`)
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(d => {
         const list: CurrencyOption[] = Array.isArray(d.data) ? d.data : []
@@ -88,34 +76,26 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
           setCurrencies(list)
           setLoaded(true)
         }
-        return list
       })
-      .catch(() => { setLoaded(true); return [] as CurrencyOption[] })
+      .catch(() => setLoaded(true))
 
-    // If user already has a saved preference, use it — no IP lookup needed
+    // If saved, set state immediately — ShopContext already fetched with this currency
     if (saved) {
       setCurrencyState(saved)
       return
     }
 
-    // No saved preference — detect from IP and validate against supported currencies
-    Promise.all([detectCurrencyFromIP(), currenciesPromise])
-      .then(([detected, list]) => {
-        if (!detected) return
-        const supported = list.map((c: CurrencyOption) => c.currency)
-        const toSet = supported.includes(detected) ? detected : null
-        if (toSet) {
-          setCurrencyState(toSet)
-          localStorage.setItem(PREF_KEY, toSet)
-          window.dispatchEvent(new CustomEvent('sn-currency-change', { detail: toSet }))
-          fetch(`${API}/exchange/preference`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Device-Token': token },
-            body: JSON.stringify({ currency: toSet }),
-          }).catch(() => {})
-        }
-      })
-      .catch(() => {})
+    // No saved preference — wait for ShopContext to resolve and write to localStorage,
+    // then pick it up. Poll localStorage briefly since ShopContext runs concurrently.
+    const poll = setInterval(() => {
+      const resolved = localStorage.getItem(PREF_KEY)
+      if (resolved) {
+        clearInterval(poll)
+        setCurrencyState(resolved)
+      }
+    }, 200)
+    // Give up after 8s and fall back to GBP
+    setTimeout(() => clearInterval(poll), 8000)
   }, [])
 
   const setCurrency = useCallback(async (code: string) => {
