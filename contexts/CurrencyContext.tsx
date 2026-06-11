@@ -40,6 +40,31 @@ function generateDeviceToken(): string {
   })
 }
 
+// Country code → ISO currency code mapping (most common countries)
+const COUNTRY_CURRENCY: Record<string, string> = {
+  GB: 'GBP', US: 'USD', EU: 'EUR', DE: 'EUR', FR: 'EUR', IT: 'EUR', ES: 'EUR',
+  NL: 'EUR', BE: 'EUR', AT: 'EUR', PT: 'EUR', IE: 'EUR', FI: 'EUR', GR: 'EUR',
+  ZW: 'USD', ZA: 'ZAR', NG: 'NGN', KE: 'KES', UG: 'UGX', TZ: 'TZS', GH: 'GHS',
+  RW: 'RWF', ZM: 'ZMW', MW: 'MWK', MZ: 'MZN', BW: 'BWP', NA: 'NAD',
+  AU: 'AUD', NZ: 'NZD', CA: 'CAD', JP: 'JPY', CN: 'CNY', IN: 'INR',
+  AE: 'AED', SA: 'SAR', EG: 'EGP', SG: 'SGD', HK: 'HKD', CH: 'CHF',
+  SE: 'SEK', NO: 'NOK', DK: 'DKK', PL: 'PLN', CZ: 'CZK', HU: 'HUF',
+  BR: 'BRL', MX: 'MXN', AR: 'ARS',
+}
+
+async function detectCurrencyFromIP(): Promise<string | undefined> {
+  try {
+    // cloudflare-free, no-auth, CORS-friendly endpoint
+    const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) })
+    if (!r.ok) return undefined
+    const d = await r.json()
+    const code = d.country_code as string
+    return COUNTRY_CURRENCY[code] ?? undefined
+  } catch {
+    return undefined
+  }
+}
+
 // Currencies that display as whole numbers (no decimals)
 const NO_DECIMALS = new Set(['UGX', 'TZS', 'RWF', 'NGN', 'KES', 'BIF', 'GNF', 'MGA', 'CLP', 'PYG', 'VND', 'KRW', 'JPY', 'IDR'])
 
@@ -65,8 +90,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     setDeviceToken(token)
 
     const saved = localStorage.getItem(PREF_KEY)
-    if (saved) setCurrencyState(saved)
 
+    // Load available currencies first
     fetch(`${API}/exchange/currencies`)
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(d => {
@@ -77,12 +102,30 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       })
       .catch(() => setLoaded(true))
 
+    // If user already has a saved preference, use it — no IP lookup needed
+    if (saved) {
+      setCurrencyState(saved)
+      return
+    }
+
+    // No saved preference — try to auto-detect currency from IP
+    // Uses the server-side preference endpoint first (may have IP-based suggestion),
+    // then falls back to a free IP geolocation API
     fetch(`${API}/exchange/preference`, { headers: { 'X-Device-Token': token } })
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d?.currency) {
           setCurrencyState(d.currency)
           localStorage.setItem(PREF_KEY, d.currency)
+        } else {
+          // Fallback: detect country from IP, map to currency
+          return detectCurrencyFromIP()
+        }
+      })
+      .then((detected: string | undefined) => {
+        if (detected) {
+          setCurrencyState(detected)
+          localStorage.setItem(PREF_KEY, detected)
         }
       })
       .catch(() => {})
