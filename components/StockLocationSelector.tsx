@@ -40,7 +40,7 @@ export default function StockLocationSelector() {
           : <span className="text-sm leading-none">{LOCATION_FLAGS[stockLocation]}</span>
         }
         <span className="hidden sm:inline">
-          {stockLocation === 'all' ? 'Location' : selected.label.split(' ')[0]}
+          {stockLocation === 'all' ? 'Stock Location' : selected.label.split(' ')[0]}
         </span>
         <ChevronDown size={11} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
