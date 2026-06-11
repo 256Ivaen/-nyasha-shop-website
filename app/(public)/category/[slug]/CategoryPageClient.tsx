@@ -1,8 +1,8 @@
 'use client'
 
 import { useContext, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { ShopContext } from '@/contexts/ShopContext'
-import { useStockLocation } from '@/contexts/StockLocationContext'
 import ProductItem from '@/components/ProductItem'
 import Pagination from '@/components/Pagination'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -15,7 +15,7 @@ interface Props { slug: string }
 export default function CategoryPageClient({ slug }: Props) {
   const ctx = useContext(ShopContext)!
   const { products, search, showSearch } = ctx
-  const { stockLocation } = useStockLocation()
+  const stockLocation = useSearchParams().get('loc') ?? 'all'
 
   const [filtered,     setFiltered]     = useState<Product[]>([])
   const [sortType,     setSortType]     = useState('relevant')

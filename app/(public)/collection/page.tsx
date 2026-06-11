@@ -1,8 +1,8 @@
 'use client'
 
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { ShopContext } from '@/contexts/ShopContext'
-import { useStockLocation } from '@/contexts/StockLocationContext'
 import Title from '@/components/Title'
 import ProductItem from '@/components/ProductItem'
 import Pagination from '@/components/Pagination'
@@ -11,10 +11,10 @@ import type { Product } from '@/contexts/ShopContext'
 
 const PER_PAGE = 8
 
-export default function CollectionPage() {
+function CollectionInner() {
   const ctx = useContext(ShopContext)!
   const { products, search, showSearch } = ctx
-  const { stockLocation } = useStockLocation()
+  const stockLocation = useSearchParams().get('loc') ?? 'all'
   const [showFilter, setShowFilter] = useState(false)
   const [filterProducts, setFilterProducts] = useState<Product[]>([])
   const [category, setCategory] = useState<string[]>([])
@@ -132,4 +132,8 @@ export default function CollectionPage() {
       </div>
     </div>
   )
+}
+
+export default function CollectionPage() {
+  return <Suspense><CollectionInner /></Suspense>
 }

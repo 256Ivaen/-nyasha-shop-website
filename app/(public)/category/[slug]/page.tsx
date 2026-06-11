@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import CategoryPageClient from './CategoryPageClient'
 
 interface Props { params: Promise<{ slug: string }> }
@@ -31,5 +32,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params
-  return <CategoryPageClient slug={decodeURIComponent(slug)} />
+  return <Suspense><CategoryPageClient slug={decodeURIComponent(slug)} /></Suspense>
 }

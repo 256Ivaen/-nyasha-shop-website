@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
@@ -341,7 +341,9 @@ export default function Navbar() {
               </div>
 
               {/* Stock location selector */}
-              <StockLocationSelector />
+              <Suspense fallback={<div className="w-28 h-7" />}>
+                <StockLocationSelector />
+              </Suspense>
 
               {/* Currency selector */}
               <CurrencySelector />
@@ -493,7 +495,9 @@ export default function Navbar() {
               {/* Mobile: stock location + currency row */}
               <div className="px-4 py-2 flex items-center gap-2">
                 <span className="text-[10px] font-semibold text-ink-muted uppercase tracking-wide flex-1">Stock Location</span>
-                <StockLocationSelector />
+                <Suspense fallback={<div className="w-20 h-7" />}>
+                  <StockLocationSelector />
+                </Suspense>
                 <CurrencySelector />
               </div>
 

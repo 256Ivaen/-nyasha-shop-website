@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import DiscountedClient from './DiscountedClient'
 
 export const metadata: Metadata = {
@@ -7,5 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function DiscountedPage() {
-  return <DiscountedClient />
+  return <Suspense><DiscountedClient /></Suspense>
 }
