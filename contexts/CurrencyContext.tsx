@@ -41,24 +41,14 @@ function generateDeviceToken(): string {
 }
 
 // Country code → ISO currency code mapping (most common countries)
-const COUNTRY_CURRENCY: Record<string, string> = {
-  GB: 'GBP', US: 'USD', EU: 'EUR', DE: 'EUR', FR: 'EUR', IT: 'EUR', ES: 'EUR',
-  NL: 'EUR', BE: 'EUR', AT: 'EUR', PT: 'EUR', IE: 'EUR', FI: 'EUR', GR: 'EUR',
-  ZW: 'USD', ZA: 'ZAR', NG: 'NGN', KE: 'KES', UG: 'UGX', TZ: 'TZS', GH: 'GHS',
-  RW: 'RWF', ZM: 'ZMW', MW: 'MWK', MZ: 'MZN', BW: 'BWP', NA: 'NAD',
-  AU: 'AUD', NZ: 'NZD', CA: 'CAD', JP: 'JPY', CN: 'CNY', IN: 'INR',
-  AE: 'AED', SA: 'SAR', EG: 'EGP', SG: 'SGD', HK: 'HKD', CH: 'CHF',
-  SE: 'SEK', NO: 'NOK', DK: 'DKK', PL: 'PLN', CZ: 'CZK', HU: 'HUF',
-  BR: 'BRL', MX: 'MXN', AR: 'ARS',
-}
 
 async function detectCurrencyFromIP(): Promise<string | undefined> {
   try {
-    const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) })
+    // Use our own backend as proxy — avoids CORS and 403 from direct browser requests to ipapi.co
+    const r = await fetch(`${API}/exchange/detect-currency`, { signal: AbortSignal.timeout(5000) })
     if (!r.ok) return undefined
     const d = await r.json()
-    // ipapi.co returns currency directly — use it if available, else map from country
-    return (d.currency as string) ?? COUNTRY_CURRENCY[d.country_code as string] ?? undefined
+    return d.success && d.currency ? (d.currency as string) : undefined
   } catch {
     return undefined
   }

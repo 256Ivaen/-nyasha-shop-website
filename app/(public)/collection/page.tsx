@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
+import { useStockLocation } from '@/contexts/StockLocationContext'
 import Title from '@/components/Title'
 import ProductItem from '@/components/ProductItem'
 import Pagination from '@/components/Pagination'
@@ -13,6 +14,7 @@ const PER_PAGE = 8
 export default function CollectionPage() {
   const ctx = useContext(ShopContext)!
   const { products, search, showSearch } = ctx
+  const { stockLocation } = useStockLocation()
   const [showFilter, setShowFilter] = useState(false)
   const [filterProducts, setFilterProducts] = useState<Product[]>([])
   const [category, setCategory] = useState<string[]>([])
@@ -33,12 +35,13 @@ export default function CollectionPage() {
     if (showSearch && search) copy = copy.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     if (category.length > 0) copy = copy.filter(p => category.includes(p.category))
     if (subCategory.length > 0) copy = copy.filter(p => p.subCategory && subCategory.includes(p.subCategory))
+    if (stockLocation !== 'all') copy = copy.filter(p => p.stock_location === stockLocation)
     setFilterProducts(copy)
     setCurrentPage(1)
     setTimeout(() => setLoading(false), 300)
   }
 
-  useEffect(() => { applyFilter() }, [products, category, subCategory, search, showSearch])
+  useEffect(() => { applyFilter() }, [products, category, subCategory, search, showSearch, stockLocation])
 
   useEffect(() => {
     let copy = filterProducts.slice()

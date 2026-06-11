@@ -1,9 +1,15 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, MapPin } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useStockLocation, STOCK_LOCATIONS } from '@/contexts/StockLocationContext'
+
+const LOCATION_FLAGS: Record<string, string> = {
+  all: '',
+  UK: '🇬🇧',
+  Zimbabwe: '🇿🇼',
+}
 
 export default function StockLocationSelector() {
   const { stockLocation, setStockLocation } = useStockLocation()
@@ -29,8 +35,13 @@ export default function StockLocationSelector() {
           open ? 'bg-primary-subtle text-ink' : 'text-ink-muted hover:text-ink hover:bg-primary-subtle'
         }`}
       >
-        <span>{selected.flag}</span>
-        <span className="hidden sm:inline">{selected.value === 'all' ? 'All' : selected.label.split(' ')[0]}</span>
+        {stockLocation === 'all'
+          ? <MapPin size={14} className="shrink-0" />
+          : <span className="text-sm leading-none">{LOCATION_FLAGS[stockLocation]}</span>
+        }
+        <span className="hidden sm:inline">
+          {stockLocation === 'all' ? 'Location' : selected.label.split(' ')[0]}
+        </span>
         <ChevronDown size={11} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
@@ -41,7 +52,7 @@ export default function StockLocationSelector() {
             animate={{ opacity: 1, y: 0,  scale: 1    }}
             exit={{    opacity: 0, y: 8,  scale: 0.97 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute right-0 top-full mt-1 w-44 bg-white border border-edge rounded-2xl overflow-hidden shadow-lg z-50 p-1"
+            className="absolute right-0 top-full mt-1 w-48 bg-white border border-edge rounded-2xl overflow-hidden shadow-lg z-50 p-1"
           >
             {STOCK_LOCATIONS.map(opt => (
               <button
@@ -54,7 +65,10 @@ export default function StockLocationSelector() {
                     : 'hover:bg-primary-subtle text-ink'
                 }`}
               >
-                <span className="text-base leading-none">{opt.flag}</span>
+                {opt.value === 'all'
+                  ? <MapPin size={14} className="shrink-0" />
+                  : <span className="text-base leading-none">{LOCATION_FLAGS[opt.value]}</span>
+                }
                 <span className="text-xs font-semibold flex-1">{opt.label}</span>
               </button>
             ))}
