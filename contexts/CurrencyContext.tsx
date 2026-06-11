@@ -54,12 +54,11 @@ const COUNTRY_CURRENCY: Record<string, string> = {
 
 async function detectCurrencyFromIP(): Promise<string | undefined> {
   try {
-    // cloudflare-free, no-auth, CORS-friendly endpoint
     const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) })
     if (!r.ok) return undefined
     const d = await r.json()
-    const code = d.country_code as string
-    return COUNTRY_CURRENCY[code] ?? undefined
+    // ipapi.co returns currency directly — use it if available, else map from country
+    return (d.currency as string) ?? COUNTRY_CURRENCY[d.country_code as string] ?? undefined
   } catch {
     return undefined
   }
