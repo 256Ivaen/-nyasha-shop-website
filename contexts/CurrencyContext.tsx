@@ -107,6 +107,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         if (toSet) {
           setCurrencyState(toSet)
           localStorage.setItem(PREF_KEY, toSet)
+          window.dispatchEvent(new CustomEvent('sn-currency-change', { detail: toSet }))
           fetch(`${API}/exchange/preference`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-Device-Token': token },
