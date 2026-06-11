@@ -11,6 +11,7 @@ import { ShopContext } from '@/contexts/ShopContext'
 import { useContext } from 'react'
 import { assets } from '@/assets/assets'
 import CurrencySelector from '@/components/CurrencySelector'
+import StockLocationSelector from '@/components/StockLocationSelector'
 import axios from 'axios'
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
@@ -339,6 +340,9 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
 
+              {/* Stock location selector */}
+              <StockLocationSelector />
+
               {/* Currency selector */}
               <CurrencySelector />
 
@@ -483,6 +487,15 @@ export default function Navbar() {
                 )}
 
               </nav>
+
+              <div className="mx-4 border-t border-edge-light my-1" />
+
+              {/* Mobile: stock location + currency row */}
+              <div className="px-4 py-2 flex items-center gap-2">
+                <span className="text-[10px] font-semibold text-ink-muted uppercase tracking-wide flex-1">Stock Location</span>
+                <StockLocationSelector />
+                <CurrencySelector />
+              </div>
 
               <div className="mx-4 border-t border-edge-light my-1" />
               <div className="px-4 py-3">

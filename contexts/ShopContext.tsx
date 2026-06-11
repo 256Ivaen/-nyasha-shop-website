@@ -20,6 +20,10 @@ export interface Product {
   discounted?: boolean
   discount_price?: number
   date?: number
+  stock_location?: string
+  dispatch_days?: number
+  ships_worldwide?: boolean
+  shipping_notes?: string
 }
 
 export interface UserData {

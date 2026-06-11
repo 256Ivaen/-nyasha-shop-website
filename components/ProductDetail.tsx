@@ -9,7 +9,7 @@ import RelatedProducts from '@/components/RelatedProducts'
 import ProductReviews from '@/components/ProductReviews'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
-import { CheckCircle, ShoppingBag } from 'lucide-react'
+import { CheckCircle, ShoppingBag, MapPin, Clock, Globe, Package } from 'lucide-react'
 import Button from '@/components/Button'
 import type { Product } from '@/contexts/ShopContext'
 
@@ -131,28 +131,117 @@ export default function ProductDetail() {
             </button>
           </div>
 
-          <div className="border-t pt-4 space-y-2">
-            {['100% Original Product', 'Cash on delivery available', 'Easy returns within 7 days'].map(text => (
+          <div className="border-t pt-4 space-y-2 mb-5">
+            {['100% Authentic African print fabric', 'Easy returns within 30 days', 'Secure checkout'].map(text => (
               <div key={text} className="flex items-center gap-2 text-xs text-gray-500">
                 <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
                 <span>{text}</span>
               </div>
             ))}
           </div>
+
+          {/* Shipping & stock info */}
+          <div className="rounded-xl border border-edge bg-[#F9F6F0] p-4 space-y-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Shipping &amp; Delivery</p>
+
+            {productData.stock_location && (
+              <div className="flex items-start gap-2.5">
+                <MapPin className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-gray-800">
+                    Stock Location: {productData.stock_location === 'UK' ? '🇬🇧 United Kingdom' : productData.stock_location === 'Zimbabwe' ? '🇿🇼 Zimbabwe' : productData.stock_location}
+                  </p>
+                  {productData.stock_location === 'Zimbabwe' && (
+                    <p className="text-[11px] text-gray-500 mt-0.5">Allow extra 5–7 days for Zimbabwe stock to be dispatched from Zimbabwe to the UK.</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {productData.dispatch_days != null && (
+              <div className="flex items-start gap-2.5">
+                <Clock className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                <p className="text-xs text-gray-700">
+                  Dispatched within <span className="font-semibold">{productData.dispatch_days} {productData.dispatch_days === 1 ? 'business day' : 'business days'}</span> of order
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-start gap-2.5">
+              <Package className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+              <p className="text-xs text-gray-700">
+                UK delivery via <span className="font-semibold">Royal Mail</span> — 2–4 working days
+              </p>
+            </div>
+
+            {productData.ships_worldwide && (
+              <div className="flex items-start gap-2.5">
+                <Globe className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                <p className="text-xs text-gray-700">
+                  <span className="font-semibold">Ships worldwide</span> — international delivery available
+                </p>
+              </div>
+            )}
+
+            {productData.shipping_notes && (
+              <p className="text-[11px] text-gray-500 border-t border-edge pt-2.5 mt-1">
+                {productData.shipping_notes}
+              </p>
+            )}
+          </div>
         </motion.div>
       </div>
 
       <div className="mt-16">
         <div className="flex border-b gap-8">
-          {['description', 'reviews'].map(tab => (
+          {['description', 'shipping', 'reviews'].map(tab => (
             <button type="button" key={tab} onClick={() => setActiveTab(tab)}
               className={`pb-3 text-xs font-medium capitalize border-b-2 transition-colors ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-              {tab === 'reviews' ? 'Reviews' : 'Description'}
+              {tab === 'reviews' ? 'Reviews' : tab === 'shipping' ? 'Shipping' : 'Description'}
             </button>
           ))}
         </div>
         <div className="py-6 text-xs text-gray-600 leading-relaxed">
           {activeTab === 'description' && productData.description}
+          {activeTab === 'shipping' && (
+            <div className="space-y-4 max-w-lg">
+              <div className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-gray-800 mb-1">Stock Location</p>
+                  <p>{productData.stock_location === 'UK' ? '🇬🇧 United Kingdom — ready to dispatch from UK' : productData.stock_location === 'Zimbabwe' ? '🇿🇼 Zimbabwe — shipped to the UK before UK delivery' : (productData.stock_location ?? 'United Kingdom')}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-gray-800 mb-1">Dispatch Time</p>
+                  <p>Orders dispatched within {productData.dispatch_days ?? 2} {(productData.dispatch_days ?? 2) === 1 ? 'business day' : 'business days'} of payment confirmation.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Package className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-gray-800 mb-1">UK Delivery</p>
+                  <p>Delivered via Royal Mail. Estimated 2–4 working days after dispatch. Free UK delivery on orders over £75.</p>
+                </div>
+              </div>
+              {productData.ships_worldwide && (
+                <div className="flex items-start gap-3">
+                  <Globe className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-semibold text-gray-800 mb-1">International Delivery</p>
+                    <p>This item ships worldwide. International delivery times vary by destination. Contact us at shop@snluxeafrica.co.uk for rates.</p>
+                  </div>
+                </div>
+              )}
+              {productData.shipping_notes && (
+                <div className="p-3 bg-[#F9F6F0] rounded-lg border border-edge text-[11px]">
+                  <span className="font-semibold text-gray-700">Note: </span>{productData.shipping_notes}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

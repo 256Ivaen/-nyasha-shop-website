@@ -16,4 +16,4 @@ export const BRAND = {
   currency:    'GBP',
 }
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://papayawhip-quail-919643.hostingersite.com'
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.snluxeafrica.co.uk'

@@ -90,16 +90,17 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
     const saved = localStorage.getItem(PREF_KEY)
 
-    // Load available currencies first
-    fetch(`${API}/exchange/currencies`)
+    const currenciesPromise = fetch(`${API}/exchange/currencies`)
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(d => {
-        if (Array.isArray(d.data) && d.data.length > 0) {
-          setCurrencies(d.data)
+        const list: CurrencyOption[] = Array.isArray(d.data) ? d.data : []
+        if (list.length > 0) {
+          setCurrencies(list)
           setLoaded(true)
         }
+        return list
       })
-      .catch(() => setLoaded(true))
+      .catch(() => { setLoaded(true); return [] as CurrencyOption[] })
 
     // If user already has a saved preference, use it — no IP lookup needed
     if (saved) {
@@ -107,24 +108,20 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    // No saved preference — try to auto-detect currency from IP
-    // Uses the server-side preference endpoint first (may have IP-based suggestion),
-    // then falls back to a free IP geolocation API
-    fetch(`${API}/exchange/preference`, { headers: { 'X-Device-Token': token } })
-      .then(r => r.ok ? r.json() : null)
-      .then(d => {
-        if (d?.currency) {
-          setCurrencyState(d.currency)
-          localStorage.setItem(PREF_KEY, d.currency)
-        } else {
-          // Fallback: detect country from IP, map to currency
-          return detectCurrencyFromIP()
-        }
-      })
-      .then((detected: string | undefined) => {
-        if (detected) {
-          setCurrencyState(detected)
-          localStorage.setItem(PREF_KEY, detected)
+    // No saved preference — detect from IP and validate against supported currencies
+    Promise.all([detectCurrencyFromIP(), currenciesPromise])
+      .then(([detected, list]) => {
+        if (!detected) return
+        const supported = list.map((c: CurrencyOption) => c.currency)
+        const toSet = supported.includes(detected) ? detected : null
+        if (toSet) {
+          setCurrencyState(toSet)
+          localStorage.setItem(PREF_KEY, toSet)
+          fetch(`${API}/exchange/preference`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Device-Token': token },
+            body: JSON.stringify({ currency: toSet }),
+          }).catch(() => {})
         }
       })
       .catch(() => {})

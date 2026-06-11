@@ -2,15 +2,17 @@ export const BRAND = {
   name:           'SN Luxe Africa',
   shortName:      'SN Luxe',
   tagline:        'Authentic African Fashion Delivered Across the UK',
-  description:    'Your home for authentic African print fashion in the UK. Ankara, Kente, Kitenge, Dashiki and more — handcrafted and delivered to your door.',
+  description:    'SN Luxe Africa (snluxeafrica.co.uk) — your home for authentic African print fashion in the UK. Ankara, Kente, Kitenge, Dashiki and more — handcrafted and delivered to your door. Stock held in the UK and Zimbabwe.',
   logo:           '/assets/SNlogo.png',
   currency:       'GBP',
   currencySymbol: '£',
+  domain:         'www.snluxeafrica.co.uk',
+  email:          'shop@snluxeafrica.co.uk',
 } as const
 
 export const CONTACT = {
   phone:       '+44 7398 277613',
-  email:       'snluxeafrica@gmail.com',
+  email:       'shop@snluxeafrica.co.uk',
   address:     'United Kingdom',
   fullAddress: 'United Kingdom',
   hours:       '9:00 – 18:00, Monday – Saturday',
@@ -21,14 +23,14 @@ export const CONTACT = {
 } as const
 
 export const SITE = {
-  url:        process.env.NEXT_PUBLIC_SITE_URL ?? 'https://snluxeafrica.com',
+  url:        process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.snluxeafrica.co.uk',
   backendUrl: process.env.NEXT_PUBLIC_BACKEND_URL ?? '',
 } as const
 
 export const ANNOUNCEMENTS = [
-  'FREE UK DELIVERY ON ALL ORDERS OVER £75',
+  'FREE UK DELIVERY ON ALL ORDERS OVER £75 — SHOP AT WWW.SNLUXEAFRICA.CO.UK',
   'BECOME A VIP — SIGN UP TODAY TO GET 10% OFF',
-  'SHOP THE LATEST ANKARA & KENTE ARRIVALS',
+  'SHOP THE LATEST ANKARA, KENTE & KITENGE ARRIVALS',
 ] as const
 
 export const NAV_LINKS = [
@@ -62,7 +64,7 @@ export const TRUST_BADGES = [
   { title: '100% Authentic',   desc: 'All fabrics and garments are genuine African print.' },
   { title: 'UK Fast Delivery', desc: 'Royal Mail delivery 2–4 working days across the UK.' },
   { title: 'Easy Returns',     desc: '30-day hassle-free return policy.' },
-  { title: '24/7 Support',     desc: 'Email or WhatsApp us anytime.' },
+  { title: '24/7 Support',     desc: 'Email shop@snluxeafrica.co.uk or WhatsApp us anytime.' },
 ] as const
 
 export const PRODUCT_GUARANTEES = [
@@ -72,7 +74,16 @@ export const PRODUCT_GUARANTEES = [
 ] as const
 
 export const SEO = {
-  defaultTitle:       'SN Luxe Africa | Authentic African Fashion in the UK',
-  defaultDescription: 'Shop authentic Ankara, Kente, Kitenge and Dashiki fashion. UK delivery. Women, men, kids and accessories.',
+  defaultTitle:       'SN Luxe Africa | Authentic African Fashion in the UK — snluxeafrica.co.uk',
+  defaultDescription: 'Shop authentic Ankara, Kente, Kitenge and Dashiki African print fashion at www.snluxeafrica.co.uk. UK fast delivery. Women, men, kids and accessories. Stock in UK & Zimbabwe.',
+  keywords: [
+    'SN Luxe Africa', 'snluxeafrica.co.uk', 'African fashion UK', 'Ankara UK',
+    'Kente UK', 'Kitenge UK', 'Dashiki UK', 'African print clothing UK',
+    'African print dress UK', 'African wear UK', 'buy African fabric UK',
+    'African fashion store UK', 'UK African clothing', 'African print online UK',
+    'Zimbabwe fashion UK', 'authentic African fashion', 'African clothing delivery UK',
+    'African print skirt', 'African print top', 'African men fashion UK',
+    'African kids clothing UK', 'African accessories UK',
+  ],
   twitterHandle:      '@snluxeafrica',
 } as const
