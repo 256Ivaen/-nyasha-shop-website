@@ -13,14 +13,14 @@ const PER_PAGE = 8
 
 function CollectionInner() {
   const ctx = useContext(ShopContext)!
-  const { products, search, showSearch } = ctx
+  const { products, search, showSearch, currencyLoading } = ctx
   const stockLocation = useSearchParams().get('loc') ?? 'all'
   const [showFilter, setShowFilter] = useState(false)
   const [filterProducts, setFilterProducts] = useState<Product[]>([])
   const [category, setCategory] = useState<string[]>([])
   const [subCategory, setSubCategory] = useState<string[]>([])
   const [sortType, setSortType] = useState('relevant')
-  const [loading, setLoading] = useState(true)
+  const [filtering, setFiltering] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
 
   const toggleCategory = (val: string) =>
@@ -30,7 +30,8 @@ function CollectionInner() {
     setSubCategory(prev => prev.includes(val) ? prev.filter(i => i !== val) : [...prev, val])
 
   const applyFilter = () => {
-    setLoading(true)
+    if (currencyLoading) return
+    setFiltering(true)
     let copy = products.slice()
     if (showSearch && search) copy = copy.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     if (category.length > 0) copy = copy.filter(p => category.includes(p.category))
@@ -38,10 +39,10 @@ function CollectionInner() {
     if (stockLocation !== 'all') copy = copy.filter(p => (p.stock_location ?? 'UK') === stockLocation)
     setFilterProducts(copy)
     setCurrentPage(1)
-    setTimeout(() => setLoading(false), 300)
+    setTimeout(() => setFiltering(false), 300)
   }
 
-  useEffect(() => { applyFilter() }, [products, category, subCategory, search, showSearch, stockLocation])
+  useEffect(() => { applyFilter() }, [products, category, subCategory, search, showSearch, stockLocation, currencyLoading])
 
   useEffect(() => {
     let copy = filterProducts.slice()
@@ -101,11 +102,20 @@ function CollectionInner() {
             </div>
           </div>
 
-          {loading ? (
+          {currencyLoading || filtering ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Array.from({ length: PER_PAGE }).map((_, i) => (
                 <div key={i} className="bg-gray-100 animate-pulse rounded h-64" />
               ))}
+            </div>
+          ) : filterProducts.length === 0 ? (
+            <div className="text-center py-24">
+              <p className="text-gray-400 text-sm font-medium">
+                {products.length === 0 ? 'No products available at the moment' : 'No products found. Try adjusting your filters.'}
+              </p>
+              {products.length > 0 && (
+                <button type="button" onClick={() => { setCategory([]); setSubCategory([]) }} className="mt-4 text-xs font-semibold text-primary underline">Clear filters</button>
+              )}
             </div>
           ) : (
             <motion.div
@@ -121,10 +131,6 @@ function CollectionInner() {
                 ))}
               </AnimatePresence>
             </motion.div>
-          )}
-
-          {!loading && filterProducts.length === 0 && (
-            <p className="text-center text-gray-500 py-20">No products found. Try adjusting your filters.</p>
           )}
 
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={p => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }) }} />

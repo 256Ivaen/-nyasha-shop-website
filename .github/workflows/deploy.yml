@@ -109,7 +109,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port:     ${{ secrets.SSH_PORT }}
           source:   "release/*"
-          target:   "/home/${{ secrets.SSH_USER }}/domains/papayawhip-quail-919643.hostingersite.com/public_html/"
+          target:   "/home/${{ secrets.SSH_USER }}/domains/snluxeafrica.uk/public_html/"
           strip_components: 1
           overwrite: true
           timeout: 120s

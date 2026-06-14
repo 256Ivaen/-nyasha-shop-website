@@ -41,7 +41,7 @@ if (!$isBot) {
 }
 
 // Bot detected — fetch OG HTML from Laravel backend
-$apiBase = 'https://aquamarine-ram-236798.hostingersite.com/api/v1';
+$apiBase = 'https://admin.snluxeafrica.uk/api/v1';
 $ogUrl   = $apiBase . '/og/' . $type . '/' . rawurlencode($slug);
 
 $ctx = stream_context_create([

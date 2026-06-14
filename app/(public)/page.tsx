@@ -35,23 +35,6 @@ export default function HomePage() {
         limit={10}
       />
 
-      {/* ── 7. CATEGORY ROWS ─────────────────────────────────────────────── */}
-      <CategoryProductRow
-        title="Eva Cosmetics"
-        subtitle="Premium skincare & beauty"
-        subCategory="Evacosmetics"
-        viewAllHref="/evacosmetics"
-        limit={8}
-      />
-
-      <CategoryProductRow
-        title="Detergents & Cleaning"
-        subtitle="Trusted brands for a clean home"
-        category="detergents"
-        viewAllHref="/detergents"
-        limit={8}
-      />
-
       {/* ── 8. TRUST BADGES + BESTSELLER GRID ───────────────────────────── */}
       <BestSeller />
     </>

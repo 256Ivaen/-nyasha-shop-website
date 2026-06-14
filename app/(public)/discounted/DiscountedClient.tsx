@@ -12,17 +12,17 @@ const PER_PAGE = 8
 
 export default function DiscountedClient() {
   const ctx = useContext(ShopContext)!
-  const { products, search, showSearch } = ctx
+  const { products, search, showSearch, currencyLoading } = ctx
   const stockLocation = useSearchParams().get('loc') ?? 'all'
 
   const [filtered,    setFiltered]    = useState<Product[]>([])
   const [sortType,    setSortType]    = useState('relevant')
   const [currentPage, setCurrentPage] = useState(1)
-  const [loading,     setLoading]     = useState(true)
+  const [filtering,   setFiltering]   = useState(false)
 
   useEffect(() => {
-    if (!products.length) return
-    setLoading(true)
+    if (currencyLoading) return
+    setFiltering(true)
     let list = products.filter(p => p.discounted)
     if (stockLocation !== 'all') list = list.filter(p => (p.stock_location ?? 'UK') === stockLocation)
     if (showSearch && search) {
@@ -33,8 +33,8 @@ export default function DiscountedClient() {
     else if (sortType === 'newest') list = [...list].reverse()
     setFiltered(list)
     setCurrentPage(1)
-    setTimeout(() => setLoading(false), 200)
-  }, [products, sortType, search, showSearch, stockLocation])
+    setTimeout(() => setFiltering(false), 200)
+  }, [products, sortType, search, showSearch, stockLocation, currencyLoading])
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
   const pageItems  = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
@@ -44,7 +44,7 @@ export default function DiscountedClient() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900">Discounted Products</h1>
-          {!loading && (
+          {!currencyLoading && !filtering && (
             <p className="text-xs text-gray-500 mt-1">{filtered.length} product{filtered.length !== 1 ? 's' : ''}</p>
           )}
         </div>
@@ -61,7 +61,7 @@ export default function DiscountedClient() {
         </select>
       </div>
 
-      {loading ? (
+      {currencyLoading || filtering ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: PER_PAGE }).map((_, i) => (
             <div key={i} className="bg-gray-100 animate-pulse rounded-xl h-64" />
