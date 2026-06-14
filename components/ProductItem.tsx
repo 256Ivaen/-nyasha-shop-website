@@ -20,7 +20,7 @@ interface ProductItemProps {
 
 export default function ProductItem({ id, slug, image, name, price, bestseller, originalPrice }: ProductItemProps) {
   const ctx = useContext(ShopContext)!
-  const { addToCart, cartItems, updateQuantity, displayPrice } = ctx
+  const { addToCart, cartItems, updateQuantity, displayPrice, currencyLoading } = ctx
   const [isUpdating, setIsUpdating] = useState(false)
 
   const cartItem = cartItems[id]
@@ -116,8 +116,12 @@ export default function ProductItem({ id, slug, image, name, price, bestseller, 
           <h3 className="text-xs font-medium text-gray-800 mb-2 line-clamp-2 min-h-[2.5rem] group-hover:text-primary transition-colors">{name}</h3>
           <div className="flex items-center justify-between mt-auto">
             <div className="flex flex-col">
-              <span className="text-primary font-bold text-xs">{displayPrice(parseFloat(String(price)))}</span>
-              {originalPrice !== undefined && (
+              {currencyLoading ? (
+                <span className="block h-4 w-16 bg-gray-200 rounded animate-pulse" />
+              ) : (
+                <span className="text-primary font-bold text-xs">{displayPrice(parseFloat(String(price)))}</span>
+              )}
+              {originalPrice !== undefined && !currencyLoading && (
                 <span className="text-gray-400 line-through text-[10px]">{displayPrice(parseFloat(String(originalPrice)))}</span>
               )}
             </div>

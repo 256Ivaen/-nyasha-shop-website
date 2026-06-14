@@ -5,7 +5,7 @@ export const dynamic = 'force-static'
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: '*', allow: '/' },
-    sitemap: 'https://www.snluxeafrica.co.uk/sitemap.xml',
-    host: 'https://www.snluxeafrica.co.uk',
+    sitemap: 'https://snluxeafrica.uk/sitemap.xml',
+    host: 'https://snluxeafrica.uk',
   }
 }

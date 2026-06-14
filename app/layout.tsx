@@ -14,14 +14,14 @@ const manrope = Manrope({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.snluxeafrica.co.uk'),
+  metadataBase: new URL('https://snluxeafrica.uk'),
   title: {
     default: `${BRAND.name} | ${BRAND.tagline}`,
     template: `%s | ${BRAND.name}`,
   },
-  description: `SN Luxe Africa — shop authentic Ankara, Kente, Kitenge, Dashiki and African print fashion online in the UK. Fast UK delivery. Stock held in the UK and Zimbabwe. Visit us at www.snluxeafrica.co.uk`,
+  description: `SN Luxe Africa — shop authentic Ankara, Kente, Kitenge, Dashiki and African print fashion online in the UK. Fast UK delivery. Stock held in the UK and Zimbabwe. Visit us at snluxeafrica.uk`,
   keywords: [
-    'SN Luxe Africa', 'snluxeafrica.co.uk', 'African fashion UK', 'Ankara fabric UK',
+    'SN Luxe Africa', 'snluxeafrica.uk', 'African fashion UK', 'Ankara fabric UK',
     'African print clothing UK', 'Kente UK', 'Kitenge UK', 'Dashiki UK',
     'African wear UK', 'African print dress UK', 'African clothing online UK',
     'African fashion store UK', 'UK African fashion', 'buy Ankara UK',
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: BRAND.name,
     title: `${BRAND.name} | Authentic African Fashion in the UK`,
-    description: `Shop Ankara, Kente, Kitenge, Dashiki and African print clothing online. UK fast delivery. Stock in UK & Zimbabwe. Shop now at www.snluxeafrica.co.uk`,
+    description: `Shop Ankara, Kente, Kitenge, Dashiki and African print clothing online. UK fast delivery. Stock in UK & Zimbabwe. Shop now at snluxeafrica.uk`,
     images: [{ url: `${SITE_URL}/og-image.jpg`, width: 1200, height: 630, alt: `${BRAND.name} — African Fashion UK` }],
   },
   twitter: {
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     site: '@snluxeafrica',
     creator: '@snluxeafrica',
     title: `${BRAND.name} | Authentic African Fashion in the UK`,
-    description: `Shop Ankara, Kente, Kitenge, Dashiki and African print clothing online. UK fast delivery. www.snluxeafrica.co.uk`,
+    description: `Shop Ankara, Kente, Kitenge, Dashiki and African print clothing online. UK fast delivery. snluxeafrica.uk`,
     images: [`${SITE_URL}/og-image.jpg`],
   },
   robots: {

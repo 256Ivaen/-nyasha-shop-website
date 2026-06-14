@@ -18,7 +18,7 @@ export default function ProductDetail() {
   // pathname is /product/{slug} or /product/_ (shell)
   const slug = pathname.split('/').filter(Boolean).pop() ?? ''
   const ctx = useContext(ShopContext)!
-  const { products, currency, displayPrice, addToCart } = ctx
+  const { products, currency, displayPrice, addToCart, currencyLoading } = ctx
   const [productData, setProductData] = useState<Product | null>(null)
   const [image, setImage] = useState('')
   const [size, setSize] = useState('')
@@ -87,7 +87,11 @@ export default function ProductDetail() {
             <Image src={assets.star_dull_icon} alt="half star" width={14} height={14} />
             <span className="text-xs text-gray-500 ml-2">(122)</span>
           </div>
-          <p className="text-xs font-bold text-primary mb-4">{displayPrice(productData.price ?? 0)}</p>
+          {currencyLoading ? (
+            <div className="h-5 w-24 bg-gray-200 rounded animate-pulse mb-4" />
+          ) : (
+            <p className="text-xs font-bold text-primary mb-4">{displayPrice(productData.price ?? 0)}</p>
+          )}
           <p className="text-gray-600 text-xs leading-relaxed mb-6">{productData.description}</p>
 
           {(productData.sizes?.length ?? 0) > 0 && (
@@ -231,7 +235,7 @@ export default function ProductDetail() {
                   <Globe className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <div>
                     <p className="font-semibold text-gray-800 mb-1">International Delivery</p>
-                    <p>This item ships worldwide. International delivery times vary by destination. Contact us at shop@snluxeafrica.co.uk for rates.</p>
+                    <p>This item ships worldwide. International delivery times vary by destination. Contact us at shop@snluxeafrica.uk for rates.</p>
                   </div>
                 </div>
               )}

@@ -16,4 +16,4 @@ export const BRAND = {
   currency:    'GBP',
 }
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.snluxeafrica.co.uk'
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://snluxeafrica.uk'

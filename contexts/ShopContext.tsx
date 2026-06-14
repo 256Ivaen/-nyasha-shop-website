@@ -84,7 +84,7 @@ export function useShop() {
 
 export default function ShopContextProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyLocal] = useState('')
-  const [currencyLoading, setCurrencyLoading] = useState(false)
+  const [currencyLoading, setCurrencyLoading] = useState(true)
   const delivery_fee = 4.99
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
   const [search, setSearch] = useState('')

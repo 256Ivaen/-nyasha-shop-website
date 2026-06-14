@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 
 export const dynamic = 'force-static'
 
-const BASE = 'https://www.snluxeafrica.co.uk'
+const BASE = 'https://snluxeafrica.uk'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
