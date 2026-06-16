@@ -15,11 +15,12 @@ interface ProductItemProps {
   price: number
   bestseller?: boolean
   originalPrice?: number
+  sizes?: string[]
 }
 
-export default function ProductItem({ id, image, name, price, bestseller, originalPrice }: ProductItemProps) {
+export default function ProductItem({ id, image, name, price, bestseller, originalPrice, sizes }: ProductItemProps) {
   const ctx = useContext(ShopContext)!
-  const { addToCart, cartItems, updateQuantity, displayPrice } = ctx
+  const { addToCart, cartItems, updateQuantity, displayPrice, navigate } = ctx
   const [isUpdating, setIsUpdating] = useState(false)
 
   const cartItem = cartItems[id]
@@ -29,13 +30,17 @@ export default function ProductItem({ id, image, name, price, bestseller, origin
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (sizes && sizes.length > 0) {
+      navigate.push(`/product?id=${id}`)
+      return
+    }
     setIsUpdating(true)
     await new Promise(r => setTimeout(r, 300))
     addToCart(id)
     toast.success('Added to cart!', {
       description: `${name} has been added to your cart`,
       duration: 2500,
-      action: { label: 'View Cart', onClick: () => window.location.href = '/cart' },
+      action: { label: 'View Cart', onClick: () => navigate.push('/cart') },
     })
     setIsUpdating(false)
   }
@@ -113,6 +118,16 @@ export default function ProductItem({ id, image, name, price, bestseller, origin
         {/* Info */}
         <div className="p-4 flex-grow flex flex-col">
           <h3 className="text-xs font-medium text-gray-800 mb-2 line-clamp-2 min-h-[2.5rem] group-hover:text-primary transition-colors">{name}</h3>
+          
+          {sizes && sizes.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {sizes.map(s => (
+                <span key={s} className="px-1.5 py-0.5 border border-edge rounded text-[9px] font-medium text-gray-500 uppercase">
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
           <div className="flex items-center justify-between mt-auto">
             <div className="flex flex-col">
               <span className="text-primary font-bold text-xs">{displayPrice(parseFloat(String(price)))}</span>
