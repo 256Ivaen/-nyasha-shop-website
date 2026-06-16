@@ -15,7 +15,7 @@ interface Props { slug: string }
 export default function CategoryPageClient({ slug }: Props) {
   const ctx = useContext(ShopContext)!
   const { products, search, showSearch, currencyLoading } = ctx
-  const stockLocation = useSearchParams().get('loc') ?? 'all'
+
 
   const [filtered,     setFiltered]     = useState<Product[]>([])
   const [sortType,     setSortType]     = useState('relevant')
@@ -32,7 +32,7 @@ export default function CategoryPageClient({ slug }: Props) {
       p.category?.toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase() ||
       p.subCategory?.toLowerCase() === categoryName.toLowerCase()
     )
-    if (stockLocation !== 'all') list = list.filter(p => (p.stock_location ?? 'UK') === stockLocation)
+
     if (showSearch && search) {
       list = list.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     }
@@ -42,7 +42,7 @@ export default function CategoryPageClient({ slug }: Props) {
     setFiltered(list)
     setCurrentPage(1)
     setTimeout(() => setFiltering(false), 200)
-  }, [products, slug, categoryName, sortType, search, showSearch, stockLocation, currencyLoading])
+  }, [products, slug, categoryName, sortType, search, showSearch, currencyLoading])
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
   const pageItems  = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)

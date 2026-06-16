@@ -148,19 +148,6 @@ export default function ProductDetail() {
           <div className="rounded-xl border border-edge bg-[#F9F6F0] p-4 space-y-3">
             <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Shipping &amp; Delivery</p>
 
-            {productData.stock_location && (
-              <div className="flex items-start gap-2.5">
-                <MapPin className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs font-semibold text-gray-800">
-                    Stock Location: {productData.stock_location === 'UK' ? '🇬🇧 United Kingdom' : productData.stock_location === 'Zimbabwe' ? '🇿🇼 Zimbabwe' : productData.stock_location}
-                  </p>
-                  {productData.stock_location === 'Zimbabwe' && (
-                    <p className="text-[11px] text-gray-500 mt-0.5">Allow extra 5–7 days for Zimbabwe stock to be dispatched from Zimbabwe to the UK.</p>
-                  )}
-                </div>
-              </div>
-            )}
 
             {productData.dispatch_days != null && (
               <div className="flex items-start gap-2.5">
@@ -209,13 +196,6 @@ export default function ProductDetail() {
           {activeTab === 'description' && productData.description}
           {activeTab === 'shipping' && (
             <div className="space-y-4 max-w-lg">
-              <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <div>
-                  <p className="font-semibold text-gray-800 mb-1">Stock Location</p>
-                  <p>{productData.stock_location === 'UK' ? '🇬🇧 United Kingdom — ready to dispatch from UK' : productData.stock_location === 'Zimbabwe' ? '🇿🇼 Zimbabwe — shipped to the UK before UK delivery' : (productData.stock_location ?? 'United Kingdom')}</p>
-                </div>
-              </div>
               <div className="flex items-start gap-3">
                 <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                 <div>

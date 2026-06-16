@@ -13,7 +13,7 @@ const PER_PAGE = 8
 export default function NewArrivalsClient() {
   const ctx = useContext(ShopContext)!
   const { products, search, showSearch, currencyLoading } = ctx
-  const stockLocation = useSearchParams().get('loc') ?? 'all'
+
 
   const [filtered,    setFiltered]    = useState<Product[]>([])
   const [sortType,    setSortType]    = useState('relevant')
@@ -24,7 +24,7 @@ export default function NewArrivalsClient() {
     if (currencyLoading) return
     setFiltering(true)
     let list = products.filter(p => p.new_arrival)
-    if (stockLocation !== 'all') list = list.filter(p => (p.stock_location ?? 'UK') === stockLocation)
+
     if (showSearch && search) {
       list = list.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     }
@@ -34,7 +34,7 @@ export default function NewArrivalsClient() {
     setFiltered(list)
     setCurrentPage(1)
     setTimeout(() => setFiltering(false), 200)
-  }, [products, sortType, search, showSearch, stockLocation, currencyLoading])
+  }, [products, sortType, search, showSearch, currencyLoading])
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
   const pageItems  = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)

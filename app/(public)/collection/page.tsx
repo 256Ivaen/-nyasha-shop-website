@@ -14,7 +14,7 @@ const PER_PAGE = 8
 function CollectionInner() {
   const ctx = useContext(ShopContext)!
   const { products, search, showSearch, currencyLoading } = ctx
-  const stockLocation = useSearchParams().get('loc') ?? 'all'
+
   const [showFilter, setShowFilter] = useState(false)
   const [filterProducts, setFilterProducts] = useState<Product[]>([])
   const [category, setCategory] = useState<string[]>([])
@@ -36,13 +36,13 @@ function CollectionInner() {
     if (showSearch && search) copy = copy.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     if (category.length > 0) copy = copy.filter(p => category.includes(p.category))
     if (subCategory.length > 0) copy = copy.filter(p => p.subCategory && subCategory.includes(p.subCategory))
-    if (stockLocation !== 'all') copy = copy.filter(p => (p.stock_location ?? 'UK') === stockLocation)
+
     setFilterProducts(copy)
     setCurrentPage(1)
     setTimeout(() => setFiltering(false), 300)
   }
 
-  useEffect(() => { applyFilter() }, [products, category, subCategory, search, showSearch, stockLocation, currencyLoading])
+  useEffect(() => { applyFilter() }, [products, category, subCategory, search, showSearch, currencyLoading])
 
   useEffect(() => {
     let copy = filterProducts.slice()

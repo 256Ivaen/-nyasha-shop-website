@@ -4,7 +4,7 @@ import './globals.css'
 import { Toaster } from 'sonner'
 import ShopContextProvider from '@/contexts/ShopContext'
 import { CurrencyProvider } from '@/contexts/CurrencyContext'
-import { StockLocationProvider } from '@/contexts/StockLocationContext'
+
 import { BRAND, SITE_URL } from '@/assets/assets'
 
 const manrope = Manrope({
@@ -66,12 +66,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={manrope.variable}>
       <body className={`${manrope.className} bg-white text-gray-900`} suppressHydrationWarning>
         <CurrencyProvider>
-          <StockLocationProvider>
-            <ShopContextProvider>
-              <Toaster position="top-center" richColors closeButton />
-              {children}
-            </ShopContextProvider>
-          </StockLocationProvider>
+          <ShopContextProvider>
+            <Toaster position="top-center" richColors closeButton />
+            {children}
+          </ShopContextProvider>
         </CurrencyProvider>
       </body>
     </html>
