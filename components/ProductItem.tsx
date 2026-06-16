@@ -19,7 +19,8 @@ interface ProductItemProps {
   sizes?: string[]
 }
 
-export default function ProductItem({ id, image, name, price, bestseller, originalPrice, sizes }: ProductItemProps) {
+export default function ProductItem({ id, slug, image, name, price, bestseller, originalPrice, sizes }: ProductItemProps) {
+  const productPath = `/product/${encodeURIComponent(slug ?? id)}`
   const ctx = useContext(ShopContext)!
   const { addToCart, cartItems, updateQuantity, displayPrice, navigate } = ctx
   const [isUpdating, setIsUpdating] = useState(false)
@@ -32,7 +33,7 @@ export default function ProductItem({ id, image, name, price, bestseller, origin
     e.preventDefault()
     e.stopPropagation()
     if (sizes && sizes.length > 0) {
-      navigate.push(`/product?id=${id}`)
+      navigate.push(productPath)
       return
     }
     setIsUpdating(true)
@@ -68,7 +69,7 @@ export default function ProductItem({ id, image, name, price, bestseller, origin
       transition={{ duration: 0.3 }}
       whileHover={{ y: -4 }}
     >
-      <Link href={`/product?id=${id}`} className="flex flex-col flex-grow">
+      <Link href={productPath} className="flex flex-col flex-grow">
         {/* Badges */}
         <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
           {bestseller && (
@@ -149,7 +150,7 @@ export default function ProductItem({ id, image, name, price, bestseller, origin
 
       {/* Cart actions — VIEW left (flex-1) | ADD/qty right (fixed square) */}
       <div className="px-3 pb-3 flex items-center gap-2">
-        <Link href={`/product?id=${id}`} className="flex-1 min-w-0">
+        <Link href={productPath} className="flex-1 min-w-0">
           <Button variant="outline" fullWidth size="sm">VIEW</Button>
         </Link>
 

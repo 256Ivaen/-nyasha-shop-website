@@ -89,7 +89,20 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
   const [search, setSearch] = useState('')
   const [showSearch, setShowSearch] = useState(false)
-  const [cartItems, setCartItems] = useState<CartItems>({})
+  const [cartItems, setCartItemsState] = useState<CartItems>(() => {
+    if (typeof window === 'undefined') return {}
+    try {
+      const saved = localStorage.getItem('sn_cart')
+      return saved ? (JSON.parse(saved) as CartItems) : {}
+    } catch { return {} }
+  })
+
+  const setCartItems = (items: CartItems) => {
+    setCartItemsState(items)
+    if (typeof window !== 'undefined') {
+      try { localStorage.setItem('sn_cart', JSON.stringify(items)) } catch {}
+    }
+  }
   const [products, setProducts] = useState<Product[]>([])
   const [token, setToken] = useState('')
   const [userData, setUserData] = useState<UserData | null>(null)
@@ -205,8 +218,25 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   const getUserCart = async (t: string) => {
     try {
       const res = await axios.get(backendUrl + '/api/v1/user/cart', { headers: authHeaders(t) })
-      if (res.data.success) setCartItems(res.data.cartData ?? {})
-    } catch { /* silent — user may not be logged in */ }
+      if (res.data.success) {
+        const serverCart: CartItems = res.data.cartData ?? {}
+        // Merge local guest cart into server cart so nothing is lost
+        const local: CartItems = (() => {
+          try {
+            const saved = typeof window !== 'undefined' ? localStorage.getItem('sn_cart') : null
+            return saved ? (JSON.parse(saved) as CartItems) : {}
+          } catch { return {} }
+        })()
+        const merged: CartItems = structuredClone(serverCart)
+        for (const [id, sizes] of Object.entries(local)) {
+          if (!merged[id]) merged[id] = {}
+          for (const [size, qty] of Object.entries(sizes)) {
+            merged[id][size] = (merged[id][size] ?? 0) + qty
+          }
+        }
+        setCartItems(merged)
+      }
+    } catch { /* silent */ }
   }
 
   const getUserData = async (t: string) => {
@@ -253,9 +283,12 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
   }
 
   const logout = () => {
-    if (typeof window !== 'undefined') localStorage.removeItem('token')
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token')
+      localStorage.removeItem('sn_cart')
+    }
     setToken('')
-    setCartItems({})
+    setCartItemsState({})
     setUserData(null)
   }
 

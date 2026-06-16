@@ -31,7 +31,7 @@ export default function RelatedProducts({ category, subCategory, currentId }: Re
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {related.map(item => (
-          <ProductItem key={item._id} id={item._id} name={item.name} image={item.image} price={item.price} sizes={item.sizes} />
+          <ProductItem key={item._id} id={item._id} slug={item.slug} name={item.name} image={item.image} price={item.price} sizes={item.sizes} />
         ))}
       </div>
     </section>
