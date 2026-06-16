@@ -9,31 +9,65 @@ import RelatedProducts from '@/components/RelatedProducts'
 import ProductReviews from '@/components/ProductReviews'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
-import { CheckCircle, ShoppingBag, MapPin, Clock, Globe, Package } from 'lucide-react'
+import { CheckCircle, ShoppingBag, Clock, Globe, Package } from 'lucide-react'
 import Button from '@/components/Button'
 import type { Product } from '@/contexts/ShopContext'
 
 export default function ProductDetail() {
   const pathname = usePathname()
-  // pathname is /product/{slug} or /product/_ (shell)
   const slug = pathname.split('/').filter(Boolean).pop() ?? ''
   const ctx = useContext(ShopContext)!
-  const { products, currency, displayPrice, addToCart, currencyLoading } = ctx
+  const { products, displayPrice, addToCart, currencyLoading, backendUrl } = ctx
   const [productData, setProductData] = useState<Product | null>(null)
   const [image, setImage] = useState('')
   const [size, setSize] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState('description')
+  const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
     if (!slug || slug === '_') return
-    const found = products.find(p => p.slug === slug)
-    if (found) {
-      setProductData(found)
-      setImage(found.image?.[0] ?? '')
+
+    // Fast-path: if already loaded in context (in-app navigation), use it instantly
+    const cached = products.find(p => p.slug === slug || String(p._id) === slug)
+    if (cached) {
+      setProductData(cached)
+      setImage(cached.image?.[0] ?? '')
       window.scrollTo(0, 0)
+      return
     }
-  }, [slug, products])
+
+    // Direct fetch: call /api/v1/products/{slug} — only loads this one product
+    setProductData(null)
+    setNotFound(false)
+    const deviceToken = typeof window !== 'undefined' ? localStorage.getItem('sn_device_token') ?? '' : ''
+    fetch(`${backendUrl}/api/v1/products/${encodeURIComponent(slug)}`, {
+      headers: { 'X-Device-Token': deviceToken },
+    })
+      .then(r => r.json())
+      .then((data: { success: boolean; product?: Product & { id?: string } }) => {
+        if (data.success && data.product) {
+          const p = { ...data.product, _id: String(data.product.id ?? data.product._id) } as Product
+          setProductData(p)
+          setImage(p.image?.[0] ?? '')
+          window.scrollTo(0, 0)
+        } else {
+          setNotFound(true)
+        }
+      })
+      .catch(() => setNotFound(true))
+  }, [slug, products, backendUrl])
+
+  if (notFound) {
+    return (
+      <div className="pt-10 pb-16 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-gray-500 text-sm">Product not found.</p>
+          <a href="/collection" className="mt-4 inline-block text-xs font-semibold text-primary underline">Browse all products</a>
+        </div>
+      </div>
+    )
+  }
 
   if (!productData) {
     return (
@@ -110,7 +144,6 @@ export default function ProductDetail() {
 
           {/* Quantity + action row */}
           <div className="flex items-center gap-2 mb-6">
-            {/* Qty stepper */}
             <div className="flex items-center border border-edge rounded-full overflow-hidden shrink-0">
               <button type="button" onClick={() => setQuantity(q => Math.max(1, q - 1))}
                 className="px-3 py-2 text-xs text-ink-muted hover:text-ink hover:bg-primary-subtle transition-colors">−</button>
@@ -119,12 +152,10 @@ export default function ProductDetail() {
                 className="px-3 py-2 text-xs text-ink-muted hover:text-ink hover:bg-primary-subtle transition-colors">+</button>
             </div>
 
-            {/* VIEW CART — flex-1 wide */}
             <a href="/cart" className="flex-1 min-w-0">
               <Button variant="outline" fullWidth size="lg">VIEW CART</Button>
             </a>
 
-            {/* ADD — compact rounded-full icon button */}
             <button
               type="button"
               onClick={handleAddToCart}
@@ -147,7 +178,6 @@ export default function ProductDetail() {
           {/* Shipping & stock info */}
           <div className="rounded-xl border border-edge bg-[#F9F6F0] p-4 space-y-3">
             <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Shipping &amp; Delivery</p>
-
 
             {productData.dispatch_days != null && (
               <div className="flex items-start gap-2.5">
@@ -229,9 +259,7 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* Full reviews section */}
       <ProductReviews productId={productData._id} />
-
       <RelatedProducts category={productData.category} subCategory={productData.subCategory} currentId={productData._id} />
     </div>
   )
