@@ -10,6 +10,7 @@ import Button from '@/components/Button'
 
 interface ProductItemProps {
   id: string
+  slug?: string
   image: string[]
   name: string
   price: number
