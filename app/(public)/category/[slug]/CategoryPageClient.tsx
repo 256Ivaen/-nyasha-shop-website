@@ -1,7 +1,6 @@
 'use client'
 
 import { useContext, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import { ShopContext } from '@/contexts/ShopContext'
 import ProductItem from '@/components/ProductItem'
 import Pagination from '@/components/Pagination'
@@ -14,25 +13,23 @@ interface Props { slug: string }
 
 export default function CategoryPageClient({ slug }: Props) {
   const ctx = useContext(ShopContext)!
-  const { products, search, showSearch, currencyLoading } = ctx
-
+  const { products, search, showSearch } = ctx
 
   const [filtered,     setFiltered]     = useState<Product[]>([])
   const [sortType,     setSortType]     = useState('relevant')
   const [currentPage,  setCurrentPage]  = useState(1)
-  const [filtering,    setFiltering]    = useState(false)
+  const [loading,      setLoading]      = useState(true)
 
   const categoryName = slug.replace(/-/g, ' ')
 
   useEffect(() => {
-    if (currencyLoading) return
-    setFiltering(true)
+    if (!products.length) return
+    setLoading(true)
     let list = products.filter(p =>
       p.category?.toLowerCase() === categoryName.toLowerCase() ||
       p.category?.toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase() ||
       p.subCategory?.toLowerCase() === categoryName.toLowerCase()
     )
-
     if (showSearch && search) {
       list = list.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     }
@@ -41,8 +38,8 @@ export default function CategoryPageClient({ slug }: Props) {
     else if (sortType === 'newest') list = [...list].reverse()
     setFiltered(list)
     setCurrentPage(1)
-    setTimeout(() => setFiltering(false), 200)
-  }, [products, slug, categoryName, sortType, search, showSearch, currencyLoading])
+    setTimeout(() => setLoading(false), 200)
+  }, [products, slug, categoryName, sortType, search, showSearch])
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
   const pageItems  = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
@@ -53,7 +50,7 @@ export default function CategoryPageClient({ slug }: Props) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900 capitalize">{categoryName}</h1>
-          {!currencyLoading && !filtering && (
+          {!loading && (
             <p className="text-xs text-gray-500 mt-1">{filtered.length} product{filtered.length !== 1 ? 's' : ''}</p>
           )}
         </div>
@@ -70,7 +67,7 @@ export default function CategoryPageClient({ slug }: Props) {
         </select>
       </div>
 
-      {currencyLoading || filtering ? (
+      {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: PER_PAGE }).map((_, i) => (
             <div key={i} className="bg-gray-100 animate-pulse rounded-xl h-64" />
@@ -89,7 +86,7 @@ export default function CategoryPageClient({ slug }: Props) {
           <AnimatePresence>
             {pageItems.map(p => (
               <motion.div key={p._id} layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                <ProductItem id={p._id} slug={p.slug} image={p.image} name={p.name} price={p.price} bestseller={p.bestseller} />
+                <ProductItem id={p._id} image={p.image} name={p.name} price={p.price} bestseller={p.bestseller} sizes={p.sizes} />
               </motion.div>
             ))}
           </AnimatePresence>

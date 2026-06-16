@@ -10,17 +10,17 @@ import Button from '@/components/Button'
 
 interface ProductItemProps {
   id: string
-  slug: string
   image: string[]
   name: string
   price: number
   bestseller?: boolean
   originalPrice?: number
+  sizes?: string[]
 }
 
-export default function ProductItem({ id, slug, image, name, price, bestseller, originalPrice }: ProductItemProps) {
+export default function ProductItem({ id, image, name, price, bestseller, originalPrice, sizes }: ProductItemProps) {
   const ctx = useContext(ShopContext)!
-  const { addToCart, cartItems, updateQuantity, displayPrice, currencyLoading } = ctx
+  const { addToCart, cartItems, updateQuantity, displayPrice, navigate } = ctx
   const [isUpdating, setIsUpdating] = useState(false)
 
   const cartItem = cartItems[id]
@@ -30,13 +30,17 @@ export default function ProductItem({ id, slug, image, name, price, bestseller, 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (sizes && sizes.length > 0) {
+      navigate.push(`/product?id=${id}`)
+      return
+    }
     setIsUpdating(true)
     await new Promise(r => setTimeout(r, 300))
     addToCart(id)
     toast.success('Added to cart!', {
       description: `${name} has been added to your cart`,
       duration: 2500,
-      action: { label: 'View Cart', onClick: () => window.location.href = '/cart' },
+      action: { label: 'View Cart', onClick: () => navigate.push('/cart') },
     })
     setIsUpdating(false)
   }
@@ -63,7 +67,7 @@ export default function ProductItem({ id, slug, image, name, price, bestseller, 
       transition={{ duration: 0.3 }}
       whileHover={{ y: -4 }}
     >
-      <Link href={`/product/${slug}`} className="flex flex-col flex-grow">
+      <Link href={`/product?id=${id}`} className="flex flex-col flex-grow">
         {/* Badges */}
         <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
           {bestseller && (
@@ -114,14 +118,20 @@ export default function ProductItem({ id, slug, image, name, price, bestseller, 
         {/* Info */}
         <div className="p-4 flex-grow flex flex-col">
           <h3 className="text-xs font-medium text-gray-800 mb-2 line-clamp-2 min-h-[2.5rem] group-hover:text-primary transition-colors">{name}</h3>
+          
+          {sizes && sizes.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {sizes.map(s => (
+                <span key={s} className="px-1.5 py-0.5 border border-edge rounded text-[9px] font-medium text-gray-500 uppercase">
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
           <div className="flex items-center justify-between mt-auto">
             <div className="flex flex-col">
-              {currencyLoading ? (
-                <span className="block h-4 w-16 bg-gray-200 rounded animate-pulse" />
-              ) : (
-                <span className="text-primary font-bold text-xs">{displayPrice(parseFloat(String(price)))}</span>
-              )}
-              {originalPrice !== undefined && !currencyLoading && (
+              <span className="text-primary font-bold text-xs">{displayPrice(parseFloat(String(price)))}</span>
+              {originalPrice !== undefined && (
                 <span className="text-gray-400 line-through text-[10px]">{displayPrice(parseFloat(String(originalPrice)))}</span>
               )}
             </div>
@@ -138,7 +148,7 @@ export default function ProductItem({ id, slug, image, name, price, bestseller, 
 
       {/* Cart actions — VIEW left (flex-1) | ADD/qty right (fixed square) */}
       <div className="px-3 pb-3 flex items-center gap-2">
-        <Link href={`/product/${slug}`} className="flex-1 min-w-0">
+        <Link href={`/product?id=${id}`} className="flex-1 min-w-0">
           <Button variant="outline" fullWidth size="sm">VIEW</Button>
         </Link>
 

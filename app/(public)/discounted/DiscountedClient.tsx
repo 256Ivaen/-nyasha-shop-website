@@ -88,6 +88,7 @@ export default function DiscountedClient() {
                   price={p.discount_price ?? p.price}
                   originalPrice={p.discount_price ? p.price : undefined}
                   bestseller={p.bestseller}
+                  sizes={p.sizes}
                 />
               </motion.div>
             ))}
