@@ -178,7 +178,12 @@ export default function Navbar() {
     toast.success('Logged out successfully')
   }, [logout, router])
 
-  const cartCount = getCartCount()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const cartCount = mounted ? getCartCount() : 0
 
   return (
     <>
