@@ -13,9 +13,10 @@ export default function PlaceOrderPaymentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState<Record<string, string> | null>(null)
+  const [paypalClientId, setPaypalClientId] = useState<string | null>(null)
 
-  // Force-reloading of PayPal SDK script when currency changes
-  const [paypalKey, setPaypalKey] = useState(Date.now())
+  // Bump key to force PayPalScriptProvider re-mount when currency changes
+  const [paypalKey, setPaypalKey] = useState(0)
 
   useEffect(() => {
     // Read cached delivery details
@@ -26,10 +27,8 @@ export default function PlaceOrderPaymentPage() {
       return
     }
 
-    // Wait until products are loaded to check cart amount validity on refresh
-    if (products.length === 0) {
-      return
-    }
+    // Wait until products are loaded before validating cart
+    if (products.length === 0) return
 
     let count = 0
     for (const sizes of Object.values(cartItems)) {
@@ -41,22 +40,36 @@ export default function PlaceOrderPaymentPage() {
       return
     }
 
+    let parsed: Record<string, string>
     try {
-      setFormData(JSON.parse(cachedData))
+      parsed = JSON.parse(cachedData)
     } catch {
       toast.error('Invalid address details cached')
       navigate.push('/place-order')
       return
     }
-    setLoading(false)
+    setFormData(parsed)
+
+    // Fetch the real PayPal client ID from the backend — never hardcode it
+    axios
+      .get(`${backendUrl}/api/v1/paypal/config`)
+      .then(res => {
+        if (res.data?.client_id) {
+          setPaypalClientId(res.data.client_id)
+        } else {
+          toast.error('Could not load payment configuration')
+        }
+      })
+      .catch(() => toast.error('Could not reach payment server'))
+      .finally(() => setLoading(false))
   }, [token, products, cartItems])
 
   useEffect(() => {
-    setPaypalKey(Date.now())
+    setPaypalKey(k => k + 1)
   }, [currency])
 
   const getOrderItems = () => {
-    const orderItems = []
+    const orderItems: object[] = []
     for (const [id, sizes] of Object.entries(cartItems)) {
       const product = products.find(p => p._id === id)
       if (!product) continue
@@ -70,7 +83,7 @@ export default function PlaceOrderPaymentPage() {
   const totalAmount = getCartAmount() + delivery_fee
   const selectedCurrency = currency || 'GBP'
 
-  if (loading || !formData) {
+  if (loading || !formData || !paypalClientId) {
     return (
       <div className="pt-14 flex items-center justify-center min-h-[400px]">
         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -80,9 +93,9 @@ export default function PlaceOrderPaymentPage() {
 
   return (
     <PayPalScriptProvider
-      key={paypalKey}
+      key={`${paypalKey}-${paypalClientId}`}
       options={{
-        clientId: 'test',
+        clientId: paypalClientId,
         currency: selectedCurrency,
         intent: 'capture',
       }}
@@ -90,7 +103,12 @@ export default function PlaceOrderPaymentPage() {
       <div className="pt-10 pb-16 max-w-4xl mx-auto px-4">
         {/* Step Indicator */}
         <div className="flex items-center justify-center gap-2 mb-10 text-xs font-semibold text-gray-400">
-          <span className="text-gray-900 cursor-pointer hover:underline" onClick={() => navigate.push('/place-order')}>Delivery Information</span>
+          <span
+            className="text-gray-900 cursor-pointer hover:underline"
+            onClick={() => navigate.push('/place-order')}
+          >
+            Delivery Information
+          </span>
           <span className="text-gray-300">/</span>
           <span className="text-primary font-bold">Payment Details</span>
         </div>
@@ -108,6 +126,7 @@ export default function PlaceOrderPaymentPage() {
               </button>
             </div>
 
+            {/* Shipping details summary */}
             <div className="border-b border-gray-200 pb-4 mb-6 text-xs text-gray-600">
               <p className="font-semibold text-gray-900 mb-1">Shipping Details:</p>
               <p>{formData.firstName} {formData.lastName}</p>
@@ -127,9 +146,7 @@ export default function PlaceOrderPaymentPage() {
                       delivery_fee: delivery_fee,
                       address: formData,
                     })
-                    if (res.data.success && res.data.id) {
-                      return res.data.id
-                    }
+                    if (res.data.success && res.data.id) return res.data.id
                     throw new Error('Could not create PayPal order')
                   } catch (err) {
                     toast.error('Failed to initiate PayPal transaction')
@@ -149,7 +166,6 @@ export default function PlaceOrderPaymentPage() {
                   try {
                     const endpoint = token ? '/api/v1/paypal/capture' : '/api/v1/paypal/guest-capture'
                     const headers = token ? { Authorization: `Bearer ${token}` } : {}
-
                     const res = await axios.post(`${backendUrl}${endpoint}`, payload, { headers })
 
                     if (res.data.success) {
@@ -169,7 +185,7 @@ export default function PlaceOrderPaymentPage() {
                 }}
                 onError={(err) => {
                   toast.error('An error occurred during the PayPal transaction flow')
-                  console.error('PayPal Buttons Error: ', err)
+                  console.error('PayPal Buttons Error:', err)
                 }}
               />
             </div>
