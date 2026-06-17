@@ -221,6 +221,7 @@ export default function PlaceOrderPage() {
                             amount: totalAmount,
                             currency: selectedCurrency,
                             delivery_fee: delivery_fee,
+                            address: formData,
                           })
                           if (res.data.success && res.data.id) {
                             return res.data.id
