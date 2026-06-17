@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@imgly/background-removal": "^1.7.0",
+    "@paypal/react-paypal-js": "^10.0.0",
     "axios": "^1.13.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

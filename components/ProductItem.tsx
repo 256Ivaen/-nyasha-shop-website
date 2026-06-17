@@ -84,7 +84,7 @@ export default function ProductItem({ id, slug, image, name, price, bestseller, 
         </div>
 
         {/* Image */}
-        <div className="relative overflow-hidden aspect-square bg-gray-50">
+        <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: '3/4' }}>
           <Image
             src={image?.[0] ?? '/placeholder.png'}
             alt={name}
