@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
 import CartTotal from '@/components/CartTotal'
 import Button from '@/components/Button'
+import CountrySelect from '@/components/CountrySelect'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { motion } from 'framer-motion'
@@ -14,8 +15,16 @@ export default function PlaceOrderInfoPage() {
   const [loading, setLoading] = useState(true)
 
   const [formData, setFormData] = useState({
-    firstName: '', lastName: '', email: '', phone: '',
-    street: '', city: '', country: 'United Kingdom',
+    firstName:    '',
+    lastName:     '',
+    email:        '',
+    phone:        '',
+    street:       '',
+    city:         '',
+    state:        '',
+    zipCode:      '',
+    country_code: 'GB',          // ISO2 sent to PayPal
+    country_name: 'United Kingdom', // human-readable for display
   })
 
   useEffect(() => {
@@ -28,16 +37,11 @@ export default function PlaceOrderInfoPage() {
     // Pre-fill from localStorage if available
     const cachedAddress = localStorage.getItem('sn_checkout_address')
     if (cachedAddress) {
-      try {
-        setFormData(JSON.parse(cachedAddress))
-      } catch { /* ignore */ }
+      try { setFormData(JSON.parse(cachedAddress)) } catch { /* ignore */ }
     }
 
     const loadProfile = async () => {
-      if (!token) {
-        setLoading(false)
-        return
-      }
+      if (!token) { setLoading(false); return }
       try {
         const res = await axios.get(backendUrl + '/api/v1/user/profile', {
           headers: { Authorization: `Bearer ${token}` },
@@ -47,13 +51,16 @@ export default function PlaceOrderInfoPage() {
           if (p) {
             setFormData(prev => ({
               ...prev,
-              firstName: prev.firstName || p.first_name || '',
-              lastName:  prev.lastName  || p.last_name  || '',
-              email:     prev.email      || p.email      || '',
-              phone:     prev.phone      || p.phone      || '',
-              street:    prev.street     || p.street     || '',
-              city:      prev.city       || p.city       || '',
-              country:   prev.country    || p.country    || 'United Kingdom',
+              firstName:    prev.firstName    || p.first_name || '',
+              lastName:     prev.lastName     || p.last_name  || '',
+              email:        prev.email        || p.email      || '',
+              phone:        prev.phone        || p.phone      || '',
+              street:       prev.street       || p.street     || '',
+              city:         prev.city         || p.city       || '',
+              state:        prev.state        || p.state      || '',
+              zipCode:      prev.zipCode      || p.zip_code   || '',
+              country_code: prev.country_code || p.country_code || 'GB',
+              country_name: prev.country_name || p.country    || 'United Kingdom',
             }))
           }
         }
@@ -63,28 +70,28 @@ export default function PlaceOrderInfoPage() {
     loadProfile()
   }, [token])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
+
+  const handleCountryChange = (iso2: string, name: string) =>
+    setFormData(prev => ({ ...prev, country_code: iso2, country_name: name }))
 
   const validateDeliveryInfo = () => {
     if (!formData.firstName.trim()) return 'First Name is required'
-    if (!formData.lastName.trim()) return 'Last Name is required'
-    if (!formData.email.trim()) return 'Email Address is required'
+    if (!formData.lastName.trim())  return 'Last Name is required'
+    if (!formData.email.trim())     return 'Email Address is required'
     if (!/\S+@\S+\.\S+/.test(formData.email)) return 'Please provide a valid email address'
-    if (!formData.phone.trim()) return 'Phone Number is required'
-    if (!formData.street.trim()) return 'Street Address is required'
-    if (!formData.city.trim()) return 'City is required'
+    if (!formData.phone.trim())     return 'Phone Number is required'
+    if (!formData.street.trim())    return 'Street Address is required'
+    if (!formData.city.trim())      return 'City is required'
+    if (!formData.country_code)     return 'Please select a country'
     return null
   }
 
   const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault()
     const errorMsg = validateDeliveryInfo()
-    if (errorMsg) {
-      toast.error(errorMsg)
-      return
-    }
-    // Save address state in localStorage to prevent page refresh losses
+    if (errorMsg) { toast.error(errorMsg); return }
     localStorage.setItem('sn_checkout_address', JSON.stringify(formData))
     navigate.push('/place-order/payment')
   }
@@ -96,6 +103,17 @@ export default function PlaceOrderInfoPage() {
       </div>
     )
   }
+
+  const fields = [
+    { name: 'firstName', placeholder: 'First Name',      required: true },
+    { name: 'lastName',  placeholder: 'Last Name',       required: true },
+    { name: 'email',     placeholder: 'Email Address',   type: 'email', required: true },
+    { name: 'phone',     placeholder: 'Phone Number',    required: true },
+    { name: 'street',    placeholder: 'Street Address',  required: true },
+    { name: 'city',      placeholder: 'City / Town',     required: true },
+    { name: 'state',     placeholder: 'State / Province (optional)' },
+    { name: 'zipCode',   placeholder: 'Postcode / ZIP (optional)' },
+  ]
 
   return (
     <div className="pt-10 pb-16 max-w-4xl mx-auto px-4">
@@ -115,15 +133,9 @@ export default function PlaceOrderInfoPage() {
             transition={{ duration: 0.2 }}
           >
             <h2 className="text-xs font-bold text-gray-900 mb-6 uppercase tracking-wider">Delivery Information</h2>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { name: 'firstName', placeholder: 'First Name', required: true },
-                { name: 'lastName',  placeholder: 'Last Name',  required: true },
-                { name: 'email',     placeholder: 'Email Address', type: 'email', required: true },
-                { name: 'phone',     placeholder: 'Phone Number',  required: true },
-                { name: 'street',    placeholder: 'Street Address', required: true },
-                { name: 'city',      placeholder: 'City',          required: true },
-              ].map(field => (
+              {fields.map(field => (
                 <input
                   key={field.name}
                   name={field.name}
@@ -136,20 +148,14 @@ export default function PlaceOrderInfoPage() {
                 />
               ))}
             </div>
+
+            {/* Country selector — full width below the grid */}
             <div className="mt-4">
-              <select
-                name="country"
-                title="Select country"
-                value={formData.country}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option>United Kingdom</option>
-                <option>England</option>
-                <option>Scotland</option>
-                <option>Wales</option>
-                <option>Northern Ireland</option>
-              </select>
+              <CountrySelect
+                value={formData.country_code}
+                onChange={handleCountryChange}
+                defaultIso2="GB"
+              />
             </div>
 
             <Button type="submit" fullWidth size="lg" className="mt-6">
