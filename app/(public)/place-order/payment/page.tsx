@@ -26,6 +26,11 @@ export default function PlaceOrderPaymentPage() {
       return
     }
 
+    // Wait until products are loaded to check cart amount validity on refresh
+    if (products.length === 0) {
+      return
+    }
+
     let count = 0
     for (const sizes of Object.values(cartItems)) {
       for (const qty of Object.values(sizes)) count += qty
@@ -44,7 +49,7 @@ export default function PlaceOrderPaymentPage() {
       return
     }
     setLoading(false)
-  }, [token])
+  }, [token, products, cartItems])
 
   useEffect(() => {
     setPaypalKey(Date.now())
