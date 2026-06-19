@@ -85,7 +85,9 @@ export function useShop() {
 export default function ShopContextProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyLocal] = useState('')
   const [currencyLoading, setCurrencyLoading] = useState(true)
-  const delivery_fee = 4.99
+  const [exchangeRate, setExchangeRate] = useState(1) // rate: 1 GBP = X selected currency
+  const DELIVERY_FEE_GBP = 4.99
+  const delivery_fee = Math.round(DELIVERY_FEE_GBP * exchangeRate * 100) / 100
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? ''
   const [search, setSearch] = useState('')
   const [showSearch, setShowSearch] = useState(false)
@@ -205,6 +207,16 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
         const mapped = res.data.products.map((p: Product & { id?: string }) => ({ ...p, _id: String(p.id ?? p._id) })).reverse()
         setProducts(mapped)
         if (res.data.currency) setCurrencyLocal(res.data.currency)
+        // Derive exchange rate from the first product that has a price so delivery fee
+        // is always expressed in the same currency as product prices
+        if (res.data.currency && mapped.length > 0) {
+          const sampleProduct = res.data.products[0]
+          if (sampleProduct?.price && sampleProduct?.price_gbp) {
+            setExchangeRate(sampleProduct.price / sampleProduct.price_gbp)
+          } else if (res.data.rate) {
+            setExchangeRate(res.data.rate)
+          }
+        }
       } else {
         toast.error(res.data.message ?? 'Failed to fetch products')
       }
