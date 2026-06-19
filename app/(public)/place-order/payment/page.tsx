@@ -16,6 +16,20 @@ export default function PlaceOrderPaymentPage() {
 
   // Force-reloading of PayPal SDK script when currency changes
   const [paypalKey, setPaypalKey] = useState(Date.now())
+  const [paypalConfig, setPaypalConfig] = useState<{ clientId: string; baseCurrency: string } | null>(null)
+
+  useEffect(() => {
+    axios.get(`${backendUrl}/api/v1/paypal/config`)
+      .then(res => {
+        if (res.data.success) {
+          setPaypalConfig({
+            clientId: res.data.client_id,
+            baseCurrency: res.data.base_currency,
+          })
+        }
+      })
+      .catch(err => console.error('Failed to load PayPal config', err))
+  }, [backendUrl])
 
   useEffect(() => {
     // Read cached delivery details
@@ -70,7 +84,10 @@ export default function PlaceOrderPaymentPage() {
   const totalAmount = getCartAmount() + delivery_fee
   const selectedCurrency = currency || 'GBP'
 
-  if (loading || !formData) {
+  // Use base currency for PayPal SDK — backend converts amounts if needed
+  const paypalCurrency = paypalConfig?.baseCurrency ?? selectedCurrency
+
+  if (loading || !formData || !paypalConfig) {
     return (
       <div className="pt-14 flex items-center justify-center min-h-[400px]">
         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -82,8 +99,8 @@ export default function PlaceOrderPaymentPage() {
     <PayPalScriptProvider
       key={paypalKey}
       options={{
-        clientId: 'test',
-        currency: selectedCurrency,
+        clientId: paypalConfig.clientId,
+        currency: paypalCurrency,
         intent: 'capture',
       }}
     >
