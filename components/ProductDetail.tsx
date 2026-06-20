@@ -126,7 +126,7 @@ export default function ProductDetail() {
           ) : (
             <p className="text-xs font-bold text-primary mb-4">{displayPrice(productData.price ?? 0)}</p>
           )}
-          <p className="text-gray-600 text-xs leading-relaxed mb-6">{productData.description}</p>
+          <p className="text-gray-600 text-xs leading-relaxed mb-6 whitespace-pre-wrap">{productData.description}</p>
 
           {(productData.sizes?.length ?? 0) > 0 && (
             <div className="mb-6">
@@ -223,7 +223,7 @@ export default function ProductDetail() {
           ))}
         </div>
         <div className="py-6 text-xs text-gray-600 leading-relaxed">
-          {activeTab === 'description' && productData.description}
+          {activeTab === 'description' && <div className="whitespace-pre-wrap text-sm">{productData.description}</div>}
           {activeTab === 'shipping' && (
             <div className="space-y-4 max-w-lg">
               <div className="flex items-start gap-3">
