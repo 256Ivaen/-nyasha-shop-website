@@ -173,7 +173,7 @@ export default function PlaceOrderPaymentPage() {
                       setCartItems({})
                       localStorage.removeItem('sn_checkout_address')
                       toast.success('Payment captured! Order placed successfully.')
-                      navigate.push(token ? '/orders' : '/')
+                      navigate.push('/order-success')
                     } else {
                       toast.error(res.data.message ?? 'Payment capture failed')
                     }
