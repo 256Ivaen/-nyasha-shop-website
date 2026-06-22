@@ -2,7 +2,7 @@ export const BRAND = {
   name:           'SN Luxe Africa',
   shortName:      'SN Luxe',
   tagline:        'Authentic African Fashion Delivered Across the UK',
-  description:    'SN Luxe Africa (snluxeafrica.uk) — your home for authentic African print fashion in the UK. Ankara, Kente, Kitenge, Dashiki and more — handcrafted and delivered to your door. Stock held in the UK and Zimbabwe.',
+  description:    'SN Luxe Africa (snluxeafrica.uk) — your home for authentic African print fashion in the UK. Ankara, Kente, Kitenge, Dashiki and more — handcrafted and delivered to your door.',
 
   logo:           '/assets/SNlogo.png',
   currency:       'GBP',
@@ -16,7 +16,7 @@ export const CONTACT = {
   email:       'shop@snluxeafrica.uk',
   address:     'United Kingdom',
   fullAddress: 'United Kingdom',
-  hours:       '9:00 – 18:00, Monday – Saturday',
+  hours:       '09:00 – 17:00 Mon–Fri | 09:00 – 12:00 Sat | Sun & Public Holidays Closed',
   whatsapp:    'https://wa.me/447398277613',
   instagram:   'https://www.instagram.com/snluxeafrica',
   facebook:    'https://www.facebook.com/snluxeafrica',

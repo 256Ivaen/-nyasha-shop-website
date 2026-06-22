@@ -183,7 +183,11 @@ export default function Footer() {
               </div>
               <div className="flex items-start gap-2.5 text-white/60 text-xs">
                 <Clock className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                <span>{CONTACT.hours}</span>
+                <div className="space-y-0.5">
+                  <p>Mon – Fri: 09:00 – 17:00</p>
+                  <p>Saturday: 09:00 – 12:00</p>
+                  <p>Sun &amp; Public Holidays: Closed</p>
+                </div>
               </div>
               <div className="flex items-start gap-2.5 text-white/60 text-xs">
                 <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />

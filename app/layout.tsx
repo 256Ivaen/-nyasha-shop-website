@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     default: `${BRAND.name} | ${BRAND.tagline}`,
     template: `%s | ${BRAND.name}`,
   },
-  description: `SN Luxe Africa — shop authentic Ankara, Kente, Kitenge, Dashiki and African print fashion online in the UK. Fast UK delivery. Stock held in the UK and Zimbabwe. Visit us at snluxeafrica.uk`,
+  description: `SN Luxe Africa — shop authentic Ankara, Kente, Kitenge, Dashiki and African print fashion online in the UK. Fast UK delivery. Visit us at snluxeafrica.uk`,
   keywords: [
     'SN Luxe Africa', 'snluxeafrica.uk', 'African fashion UK', 'Ankara fabric UK',
     'African print clothing UK', 'Kente UK', 'Kitenge UK', 'Dashiki UK',

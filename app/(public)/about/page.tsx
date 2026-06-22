@@ -1,8 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { assets } from '@/assets/assets'
-import { CONTACT } from '@/assets/content'
+import { BRAND, CONTACT } from '@/assets/content'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Mail, Phone, MessageCircle } from 'lucide-react'
@@ -25,13 +24,21 @@ export default function AboutPage() {
       </motion.div>
 
       <motion.div className="flex flex-col md:flex-row gap-6 mb-6" initial="hidden" animate="visible" variants={stagger}>
-        <motion.div className="flex-1 md:max-w-xs" variants={fadeInUp}>
-          <Image src={assets.about_img} alt="About SN Luxe Africa" width={400} height={300} className="w-full h-48 md:h-64 rounded-2xl object-cover border border-edge" />
+        <motion.div className="flex-shrink-0 flex items-start justify-center md:justify-start" variants={fadeInUp}>
+          <Image
+            src={BRAND.logo}
+            alt="SN Luxe Africa Logo"
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="h-40 w-auto object-contain"
+            priority
+          />
         </motion.div>
         <motion.div className="flex-1 space-y-3" variants={fadeInUp}>
           <h2 className="text-xs font-bold text-gray-900 tracking-widest uppercase">Our Story</h2>
           <p className="text-gray-600 text-xs leading-relaxed">
-            SN Luxe Africa brings you the finest Ankara, Kente, Kitenge and Dashiki fashion — handcrafted and delivered across the UK. Every piece is genuine, quality-checked and crafted by skilled artisans across West and East Africa.
+            SN Luxe Africa brings you the finest Ankara, Kente, Kitenge and Dashiki fashion — handcrafted and delivered across the UK. Every piece is genuine, quality-checked and crafted by skilled artisans across Africa.
           </p>
           <div className="grid grid-cols-4 gap-2">
             {[
