@@ -3,12 +3,14 @@
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
 import { Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
   const ctx = useContext(ShopContext)!
   const { token, navigate, login, register } = ctx
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') ?? '/'
   const [currentState, setCurrentState] = useState<'Login' | 'Sign Up'>('Login')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPw, setShowPw] = useState(false)
@@ -20,7 +22,7 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState('')
 
   useEffect(() => {
-    if (token) navigate.push('/')
+    if (token) navigate.push(redirectTo)
   }, [token])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -49,11 +51,11 @@ export default function LoginPage() {
     try {
       if (currentState === 'Sign Up') {
         const res = await register(`${formData.firstName} ${formData.lastName}`, formData.email, formData.password)
-        if (res.success) navigate.push('/')
+        if (res.success) navigate.push(redirectTo)
         else setErrorMsg(res.message ?? 'Registration failed.')
       } else {
         const res = await login(formData.email, formData.password)
-        if (res.success) navigate.push('/')
+        if (res.success) navigate.push(redirectTo)
         else setErrorMsg(res.message ?? 'Invalid email or password.')
       }
     } finally {

@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
+import { useStockLocation } from '@/contexts/StockLocationContext'
 import Title from '@/components/Title'
 import ProductItem from '@/components/ProductItem'
 import Pagination from '@/components/Pagination'
@@ -13,6 +14,7 @@ const PER_PAGE = 5
 export default function DetergentsPage() {
   const ctx = useContext(ShopContext)!
   const { products, search, showSearch } = ctx
+  const { stockLocation } = useStockLocation()
   const [filterProducts, setFilterProducts] = useState<Product[]>([])
   const [category, setCategory] = useState<string[]>([])
   const [sortType, setSortType] = useState('relevant')
@@ -25,6 +27,7 @@ export default function DetergentsPage() {
   const applyFilter = () => {
     setLoading(true)
     let copy = products.slice()
+    if (stockLocation !== 'all') copy = copy.filter(p => p.stock_location === stockLocation)
     if (showSearch && search) copy = copy.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     if (category.length > 0) copy = copy.filter(p => category.includes(p.category))
     copy = copy.filter(p => p.subCategory === 'Pearl' || p.subCategory === 'Apex' || p.category?.toLowerCase() === 'detergents')
@@ -33,7 +36,7 @@ export default function DetergentsPage() {
     setTimeout(() => setLoading(false), 300)
   }
 
-  useEffect(() => { applyFilter() }, [products, category, search, showSearch])
+  useEffect(() => { applyFilter() }, [products, category, search, showSearch, stockLocation])
 
   const totalPages = Math.ceil(filterProducts.length / PER_PAGE)
   const pageItems = filterProducts.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)

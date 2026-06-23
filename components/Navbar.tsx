@@ -11,6 +11,7 @@ import { ShopContext } from '@/contexts/ShopContext'
 import { useContext } from 'react'
 import { assets } from '@/assets/assets'
 import CurrencySelector from '@/components/CurrencySelector'
+import StockLocationSelector from '@/components/StockLocationSelector'
 
 import axios from 'axios'
 
@@ -346,6 +347,9 @@ export default function Navbar() {
               </div>
 
 
+
+              {/* Stock location selector */}
+              <StockLocationSelector />
 
               {/* Currency selector */}
               <CurrencySelector />

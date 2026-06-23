@@ -196,12 +196,14 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
     }
   }
 
-  const getProductsData = async (currencyCode?: string) => {
+  const getProductsData = async (currencyCode?: string, stockLoc?: string) => {
     setCurrencyLoading(true)
     try {
       const deviceToken = typeof window !== 'undefined' ? localStorage.getItem('sn_device_token') ?? '' : ''
+      const loc = stockLoc ?? (typeof window !== 'undefined' ? localStorage.getItem('sn_stock_location') ?? 'all' : 'all')
       const headers: Record<string, string> = { 'X-Device-Token': deviceToken }
       if (currencyCode) headers['X-Currency'] = currencyCode
+      if (loc && loc !== 'all') headers['X-Stock-Location'] = loc
       const res = await axios.get(backendUrl + '/api/v1/products', { headers })
       if (res.data.success) {
         const mapped = res.data.products.map((p: Product & { id?: string }) => ({ ...p, _id: String(p.id ?? p._id) })).reverse()
@@ -388,7 +390,19 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
       }
     }
     window.addEventListener('sn-currency-change', handleCurrencyChange)
-    return () => window.removeEventListener('sn-currency-change', handleCurrencyChange)
+
+    // Re-fetch when user changes stock location — preserve current currency
+    const handleLocationChange = (e: Event) => {
+      const loc = (e as CustomEvent<string>).detail
+      const currentCurrency = localStorage.getItem('sn_preferred_currency') ?? undefined
+      getProductsData(currentCurrency, loc)
+    }
+    window.addEventListener('sn-stock-location-change', handleLocationChange)
+
+    return () => {
+      window.removeEventListener('sn-currency-change', handleCurrencyChange)
+      window.removeEventListener('sn-stock-location-change', handleLocationChange)
+    }
   }, [])
 
   useEffect(() => {

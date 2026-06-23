@@ -32,6 +32,13 @@ export default function PlaceOrderPaymentPage() {
   }, [backendUrl])
 
   useEffect(() => {
+    // Must be logged in — no guest checkout
+    if (!token) {
+      toast.error('Please sign in to complete your purchase')
+      navigate.push('/login?redirect=/place-order/payment')
+      return
+    }
+
     // Read cached delivery details
     const cachedData = localStorage.getItem('sn_checkout_address')
     if (!cachedData) {
@@ -164,10 +171,9 @@ export default function PlaceOrderPaymentPage() {
                   }
 
                   try {
-                    const endpoint = token ? '/api/v1/paypal/capture' : '/api/v1/paypal/guest-capture'
-                    const headers = token ? { Authorization: `Bearer ${token}` } : {}
-
-                    const res = await axios.post(`${backendUrl}${endpoint}`, payload, { headers })
+                    const res = await axios.post(`${backendUrl}/api/v1/paypal/capture`, payload, {
+                      headers: { Authorization: `Bearer ${token}` },
+                    })
 
                     if (res.data.success) {
                       setCartItems({})

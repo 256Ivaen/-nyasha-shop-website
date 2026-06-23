@@ -28,6 +28,13 @@ export default function PlaceOrderInfoPage() {
   })
 
   useEffect(() => {
+    // Must be logged in — accounts required for order tracking
+    if (!token) {
+      toast.error('Please sign in to place an order')
+      navigate.push('/login?redirect=/place-order')
+      return
+    }
+
     let count = 0
     for (const sizes of Object.values(cartItems)) {
       for (const qty of Object.values(sizes)) count += qty

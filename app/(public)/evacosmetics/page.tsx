@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
+import { useStockLocation } from '@/contexts/StockLocationContext'
 import Title from '@/components/Title'
 import ProductItem from '@/components/ProductItem'
 import Pagination from '@/components/Pagination'
@@ -13,6 +14,7 @@ const PER_PAGE = 5
 export default function EvaCosmeticsPage() {
   const ctx = useContext(ShopContext)!
   const { products, search, showSearch } = ctx
+  const { stockLocation } = useStockLocation()
   const [filterProducts, setFilterProducts] = useState<Product[]>([])
   const [sortType, setSortType] = useState('relevant')
   const [loading, setLoading] = useState(true)
@@ -21,6 +23,7 @@ export default function EvaCosmeticsPage() {
   const applyFilter = () => {
     setLoading(true)
     let copy = products.slice()
+    if (stockLocation !== 'all') copy = copy.filter(p => p.stock_location === stockLocation)
     if (showSearch && search) copy = copy.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     copy = copy.filter(p => p.subCategory === 'Evacosmetics' || p.category?.toLowerCase().includes('cosmetic'))
     if (sortType === 'low-high') copy.sort((a, b) => a.price - b.price)
@@ -30,7 +33,7 @@ export default function EvaCosmeticsPage() {
     setTimeout(() => setLoading(false), 300)
   }
 
-  useEffect(() => { applyFilter() }, [products, search, showSearch, sortType])
+  useEffect(() => { applyFilter() }, [products, search, showSearch, sortType, stockLocation])
 
   const totalPages = Math.ceil(filterProducts.length / PER_PAGE)
   const pageItems = filterProducts.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)

@@ -1,18 +1,14 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { ChevronDown, MapPin } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { STOCK_LOCATIONS } from '@/contexts/StockLocationContext'
+import { useStockLocation, STOCK_LOCATIONS, StockLocationValue } from '@/contexts/StockLocationContext'
 
 const FLAGS: Record<string, string> = { UK: '🇬🇧', Zimbabwe: '🇿🇼' }
 
 export default function StockLocationSelector() {
-  const router      = useRouter()
-  const pathname    = usePathname()
-  const searchParams = useSearchParams()
-  const current     = (searchParams.get('loc') ?? 'all') as 'all' | 'UK' | 'Zimbabwe'
+  const { stockLocation, setStockLocation } = useStockLocation()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -24,16 +20,12 @@ export default function StockLocationSelector() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  const select = (val: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    if (val === 'all') params.delete('loc')
-    else params.set('loc', val)
-    const qs = params.toString()
-    router.push(`${pathname}${qs ? `?${qs}` : ''}`)
+  const selected = STOCK_LOCATIONS.find(l => l.value === stockLocation) ?? STOCK_LOCATIONS[0]
+
+  const handleSelect = (val: StockLocationValue) => {
+    setStockLocation(val)
     setOpen(false)
   }
-
-  const selected = STOCK_LOCATIONS.find(l => l.value === current) ?? STOCK_LOCATIONS[0]
 
   return (
     <div className="relative" ref={ref}>
@@ -41,15 +33,17 @@ export default function StockLocationSelector() {
         type="button"
         onClick={() => setOpen(v => !v)}
         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-          open || current !== 'all' ? 'bg-primary-subtle text-ink' : 'text-ink-muted hover:text-ink hover:bg-primary-subtle'
+          open || stockLocation !== 'all'
+            ? 'bg-primary-subtle text-ink'
+            : 'text-ink-muted hover:text-ink hover:bg-primary-subtle'
         }`}
       >
-        {current === 'all'
+        {stockLocation === 'all'
           ? <MapPin size={14} className="shrink-0" />
-          : <span className="text-sm leading-none">{FLAGS[current]}</span>
+          : <span className="text-sm leading-none">{FLAGS[stockLocation]}</span>
         }
         <span className="hidden sm:inline">
-          {current === 'all' ? 'Stock Location' : selected.label.split(' ')[0]}
+          {stockLocation === 'all' ? 'Stock' : selected.label.split(' ')[0]}
         </span>
         <ChevronDown size={11} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -67,9 +61,9 @@ export default function StockLocationSelector() {
               <button
                 key={opt.value}
                 type="button"
-                onClick={() => select(opt.value)}
+                onClick={() => handleSelect(opt.value)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors text-left ${
-                  opt.value === current
+                  opt.value === stockLocation
                     ? 'bg-primary text-white'
                     : 'hover:bg-primary-subtle text-ink'
                 }`}
