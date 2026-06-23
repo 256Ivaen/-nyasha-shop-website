@@ -47,7 +47,7 @@ export interface CartItems {
 interface ShopContextValue {
   products: Product[]
   currency: string
-  displayPrice: (ugxAmount: number) => string
+  displayPrice: (amount: number) => string
   delivery_fee: number
   search: string
   setSearch: (v: string) => void
@@ -357,7 +357,7 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
     const API        = `${BACKEND}/api/v1`
 
     // Resolve currency once — saved preference wins, otherwise detect from IP via backend.
-    // Only then fetch products so there is never a GBP→UGX flash.
+    // Only then fetch products so there is never a currency flash before GBP is confirmed.
     const resolveCurrency = async (): Promise<string> => {
       const saved = localStorage.getItem(PREF_KEY)
       if (saved) return saved
