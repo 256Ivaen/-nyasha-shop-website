@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
+import { useStockLocation } from '@/contexts/StockLocationContext'
 import Title from '@/components/Title'
 import ProductItem from '@/components/ProductItem'
 import { ShieldCheck, Truck, RotateCcw, Headphones } from 'lucide-react'
@@ -16,16 +17,16 @@ const badges = [
 
 export default function BestSeller() {
   const ctx = useContext(ShopContext)!
-  const { products } = ctx
+  const { products, currencyLoading } = ctx
+  const { stockLocation } = useStockLocation()
   const [bestSellers, setBestSellers] = useState<Product[]>([])
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (products.length > 0) {
-      setBestSellers(products.filter(p => p.bestseller).slice(0, 5))
-      setIsLoading(false)
-    }
-  }, [products])
+    if (currencyLoading) return
+    let list = products.filter(p => p.bestseller)
+    if (stockLocation !== 'all') list = list.filter(p => p.stock_location === stockLocation || p.stock_location === 'Both')
+    setBestSellers(list.slice(0, 5))
+  }, [products, stockLocation, currencyLoading])
 
   return (
     <section className="py-5 lg:py-10">
@@ -34,7 +35,7 @@ export default function BestSeller() {
         <p className="text-gray-500 text-xs mt-1">Our most loved products. Trusted by thousands of customers.</p>
       </div>
 
-      {isLoading ? (
+      {currencyLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
           {Array.from({ length: 5 }).map((_, i) => <div key={i} className="bg-gray-100 animate-pulse rounded-xl h-72" />)}
         </div>
@@ -45,7 +46,10 @@ export default function BestSeller() {
           ))}
         </div>
       ) : (
-        <p className="text-center text-gray-400 py-12">No bestsellers yet. Check back soon!</p>
+        <div className="text-center py-12">
+          <p className="text-gray-900 text-sm font-semibold">No bestsellers found</p>
+          <p className="text-gray-400 text-xs mt-1">Try switching to a different stock location.</p>
+        </div>
       )}
 
       <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">

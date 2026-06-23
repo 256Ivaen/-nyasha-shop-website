@@ -13,30 +13,28 @@ const PER_PAGE = 5
 
 export default function DetergentsPage() {
   const ctx = useContext(ShopContext)!
-  const { products, search, showSearch } = ctx
+  const { products, search, showSearch, currencyLoading } = ctx
   const { stockLocation } = useStockLocation()
   const [filterProducts, setFilterProducts] = useState<Product[]>([])
   const [category, setCategory] = useState<string[]>([])
   const [sortType, setSortType] = useState('relevant')
-  const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
+  const [ready, setReady] = useState(false)
 
   const toggleCategory = (val: string) =>
     setCategory(prev => prev.includes(val) ? prev.filter(i => i !== val) : [...prev, val])
 
-  const applyFilter = () => {
-    setLoading(true)
+  useEffect(() => {
+    if (currencyLoading) return
     let copy = products.slice()
-    if (stockLocation !== 'all') copy = copy.filter(p => p.stock_location === stockLocation)
+    if (stockLocation !== 'all') copy = copy.filter(p => p.stock_location === stockLocation || p.stock_location === 'Both')
     if (showSearch && search) copy = copy.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     if (category.length > 0) copy = copy.filter(p => category.includes(p.category))
     copy = copy.filter(p => p.subCategory === 'Pearl' || p.subCategory === 'Apex' || p.category?.toLowerCase() === 'detergents')
     setFilterProducts(copy)
     setCurrentPage(1)
-    setTimeout(() => setLoading(false), 300)
-  }
-
-  useEffect(() => { applyFilter() }, [products, category, search, showSearch, stockLocation])
+    setReady(true)
+  }, [products, category, search, showSearch, stockLocation, currencyLoading])
 
   const totalPages = Math.ceil(filterProducts.length / PER_PAGE)
   const pageItems = filterProducts.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
@@ -72,9 +70,14 @@ export default function DetergentsPage() {
             </div>
           </div>
 
-          {loading ? (
+          {!ready ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Array.from({ length: PER_PAGE }).map((_, i) => <div key={i} className="bg-gray-100 animate-pulse rounded h-64" />)}
+            </div>
+          ) : filterProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-900 text-sm font-semibold">No detergent products found</p>
+              <p className="text-gray-400 text-xs mt-1">Try switching to a different stock location.</p>
             </div>
           ) : (
             <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -86,10 +89,6 @@ export default function DetergentsPage() {
                 ))}
               </AnimatePresence>
             </motion.div>
-          )}
-
-          {!loading && filterProducts.length === 0 && (
-            <p className="text-center text-gray-500 py-20">No detergent products found.</p>
           )}
 
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={p => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }) }} />

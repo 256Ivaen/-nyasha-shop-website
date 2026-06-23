@@ -4,6 +4,7 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { ShopContext } from '@/contexts/ShopContext'
+import { useStockLocation } from '@/contexts/StockLocationContext'
 import ProductItem from '@/components/ProductItem'
 import Button from '@/components/Button'
 import type { Product } from '@/contexts/ShopContext'
@@ -20,20 +21,20 @@ interface Props {
 
 export default function CategoryProductRow({ title, subtitle, category, subCategory, bestsellersOnly, viewAllHref, limit = 8 }: Props) {
   const ctx = useContext(ShopContext)!
-  const { products } = ctx
+  const { products, currencyLoading } = ctx
+  const { stockLocation } = useStockLocation()
   const [items, setItems]   = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!products.length) return
+    if (currencyLoading) return
     let list = products.slice()
+    if (stockLocation !== 'all') list = list.filter(p => p.stock_location === stockLocation || p.stock_location === 'Both')
     if (bestsellersOnly) list = list.filter(p => !!p.bestseller)
     if (category)        list = list.filter(p => p.category?.toLowerCase() === category.toLowerCase())
     if (subCategory)     list = list.filter(p => p.subCategory === subCategory || p.category?.toLowerCase().includes(subCategory.toLowerCase()))
     setItems(list.slice(0, limit))
-    setLoading(false)
-  }, [products, category, subCategory, bestsellersOnly, limit])
+  }, [products, category, subCategory, bestsellersOnly, limit, stockLocation, currencyLoading])
 
   const scroll = (dir: 'left' | 'right') => {
     const el = scrollRef.current
@@ -41,7 +42,7 @@ export default function CategoryProductRow({ title, subtitle, category, subCateg
     el.scrollBy({ left: dir === 'left' ? -300 : 300, behavior: 'smooth' })
   }
 
-  if (!loading && items.length === 0) return null
+  if (!currencyLoading && items.length === 0) return null
 
   const href = viewAllHref ?? (category ? `/collection?category=${encodeURIComponent(category)}` : '/collection')
 
@@ -75,7 +76,7 @@ export default function CategoryProductRow({ title, subtitle, category, subCateg
         </div>
       </div>
 
-      {loading ? (
+      {currencyLoading ? (
         <div className="flex gap-3 overflow-hidden">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="w-44 shrink-0 h-64 bg-gray-100 animate-pulse rounded-xl" />

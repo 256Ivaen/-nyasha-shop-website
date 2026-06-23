@@ -203,20 +203,19 @@ export default function ShopContextProvider({ children }: { children: ReactNode 
       const loc = stockLoc ?? (typeof window !== 'undefined' ? localStorage.getItem('sn_stock_location') ?? 'all' : 'all')
       const headers: Record<string, string> = { 'X-Device-Token': deviceToken }
       if (currencyCode) headers['X-Currency'] = currencyCode
-      if (loc && loc !== 'all') headers['X-Stock-Location'] = loc
-      const res = await axios.get(backendUrl + '/api/v1/products', { headers })
+      const params: Record<string, string> = {}
+      if (loc && loc !== 'all') params['location'] = loc
+      const res = await axios.get(backendUrl + '/api/v1/products', { headers, params })
       if (res.data.success) {
         const mapped = res.data.products.map((p: Product & { id?: string }) => ({ ...p, _id: String(p.id ?? p._id) })).reverse()
         setProducts(mapped)
         if (res.data.currency) setCurrencyLocal(res.data.currency)
-        // Derive exchange rate from the first product that has a price so delivery fee
-        // is always expressed in the same currency as product prices
-        if (res.data.currency && mapped.length > 0) {
+        if (res.data.rate) {
+          setExchangeRate(res.data.rate)
+        } else if (mapped.length > 0) {
           const sampleProduct = res.data.products[0]
           if (sampleProduct?.price && sampleProduct?.price_gbp) {
             setExchangeRate(sampleProduct.price / sampleProduct.price_gbp)
-          } else if (res.data.rate) {
-            setExchangeRate(res.data.rate)
           }
         }
       } else {

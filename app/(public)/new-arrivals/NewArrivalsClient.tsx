@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
+import { useStockLocation } from '@/contexts/StockLocationContext'
 import ProductItem from '@/components/ProductItem'
 import Pagination from '@/components/Pagination'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,28 +12,27 @@ const PER_PAGE = 8
 
 export default function NewArrivalsClient() {
   const ctx = useContext(ShopContext)!
-  const { products, search, showSearch } = ctx
+  const { products, search, showSearch, currencyLoading } = ctx
+  const { stockLocation } = useStockLocation()
 
   const [filtered,    setFiltered]    = useState<Product[]>([])
   const [sortType,    setSortType]    = useState('relevant')
   const [currentPage, setCurrentPage] = useState(1)
-  const [loading,     setLoading]     = useState(true)
+  const [seenData,    setSeenData]    = useState(false)
 
   useEffect(() => {
-    if (!products.length) return
-    setLoading(true)
     let list = products.filter(p => p.new_arrival)
-    if (showSearch && search) {
-      list = list.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
-    }
+    if (stockLocation !== 'all') list = list.filter(p => p.stock_location === stockLocation || p.stock_location === 'Both')
+    if (showSearch && search) list = list.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     if (sortType === 'low-high') list = [...list].sort((a, b) => a.price - b.price)
     else if (sortType === 'high-low') list = [...list].sort((a, b) => b.price - a.price)
     else if (sortType === 'newest') list = [...list].reverse()
     setFiltered(list)
     setCurrentPage(1)
-    setTimeout(() => setLoading(false), 200)
-  }, [products, sortType, search, showSearch])
+    if (!currencyLoading) setSeenData(true)
+  }, [products, sortType, search, showSearch, stockLocation, currencyLoading])
 
+  const showSkeleton = !seenData && currencyLoading
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
   const pageItems  = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
 
@@ -41,7 +41,7 @@ export default function NewArrivalsClient() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900">New Arrivals</h1>
-          {!loading && (
+          {!showSkeleton && (
             <p className="text-xs text-gray-500 mt-1">{filtered.length} product{filtered.length !== 1 ? 's' : ''}</p>
           )}
         </div>
@@ -58,22 +58,19 @@ export default function NewArrivalsClient() {
         </select>
       </div>
 
-      {loading ? (
+      {showSkeleton ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: PER_PAGE }).map((_, i) => (
             <div key={i} className="bg-gray-100 animate-pulse rounded-xl h-64" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-24">
-          <p className="text-gray-400 text-sm font-medium">No new arrivals at the moment</p>
-          <a href="/collection" className="mt-4 inline-block text-xs font-semibold text-primary underline">Browse all products</a>
+        <div className="text-center py-12">
+          <p className="text-gray-900 text-sm font-semibold">No new arrivals found</p>
+          <p className="text-gray-400 text-xs mt-1">Try switching to a different stock location.</p>
         </div>
       ) : (
-        <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-4"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-        >
+        <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <AnimatePresence>
             {pageItems.map(p => (
               <motion.div key={p._id} layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>

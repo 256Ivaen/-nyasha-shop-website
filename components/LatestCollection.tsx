@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '@/contexts/ShopContext'
+import { useStockLocation } from '@/contexts/StockLocationContext'
 import Title from '@/components/Title'
 import Button from '@/components/Button'
 import ProductItem from '@/components/ProductItem'
@@ -11,16 +12,19 @@ import type { Product } from '@/contexts/ShopContext'
 
 export default function LatestCollection() {
   const ctx = useContext(ShopContext)!
-  const { products } = ctx
+  const { products, currencyLoading } = ctx
+  const { stockLocation } = useStockLocation()
   const [latest, setLatest] = useState<Product[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [seenData, setSeenData] = useState(false)
 
   useEffect(() => {
-    if (products.length > 0) {
-      setLatest(products.slice(0, 10))
-      setIsLoading(false)
-    }
-  }, [products])
+    let list = products.slice()
+    if (stockLocation !== 'all') list = list.filter(p => p.stock_location === stockLocation || p.stock_location === 'Both')
+    setLatest(list.slice(0, 10))
+    if (!currencyLoading) setSeenData(true)
+  }, [products, stockLocation, currencyLoading])
+
+  const showSkeleton = !seenData && currencyLoading
 
   return (
     <section className="py-5 lg:py-10">
@@ -35,23 +39,25 @@ export default function LatestCollection() {
         </Link>
       </motion.div>
 
-      {isLoading ? (
+      {showSkeleton ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="bg-gray-100 animate-pulse rounded-xl h-72" />
           ))}
         </div>
-      ) : latest.length > 0 ? (
+      ) : latest.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-900 text-sm font-semibold">No products found</p>
+          <p className="text-gray-400 text-xs mt-1">Try switching to a different stock location.</p>
+        </div>
+      ) : (
         <motion.div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
           initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
           {latest.map(item => (
             <ProductItem key={item._id} id={item._id} slug={item.slug} name={item.name} image={item.image} price={item.price} />
           ))}
         </motion.div>
-      ) : (
-        <p className="text-center text-gray-400 py-12">No products available yet.</p>
       )}
-
     </section>
   )
 }
