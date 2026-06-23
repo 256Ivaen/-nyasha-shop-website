@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import { Facebook, Instagram, MapPin, Phone, Mail, Clock } from 'lucide-react'
 import Image from 'next/image'
-import { BRAND, CONTACT, FOOTER_QUICK_LINKS, FOOTER_QUICK_SHOP, ANNOUNCEMENTS } from '@/assets/content'
+import { BRAND, CONTACT, FOOTER_QUICK_LINKS, FOOTER_QUICK_SHOP, FOOTER_LEGAL, ANNOUNCEMENTS } from '@/assets/content'
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -125,7 +125,7 @@ export default function Footer() {
 
       {/* ── Main Grid ───────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 py-14">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
 
           {/* Col 1: Brand */}
           <div>
@@ -209,6 +209,20 @@ export default function Footer() {
               ))}
             </ul>
           </div>
+
+          {/* Col 5: Help & Legal */}
+          <div>
+            <h3 className="text-xs font-bold tracking-widest uppercase mb-5">HELP &amp; LEGAL</h3>
+            <ul className="space-y-3">
+              {FOOTER_LEGAL.map(link => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-white/60 text-xs hover:text-white transition-colors tracking-wide">
+                    {link.label.toUpperCase()}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -217,10 +231,19 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
 
-            {/* Copyright */}
-            <p className="text-white/40 text-xs order-2 sm:order-1">
-              &copy; {year} {BRAND.name}. All rights reserved.
-            </p>
+            {/* Copyright + legal links */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 order-2 sm:order-1">
+              <p className="text-white/40 text-xs">
+                &copy; {year} {BRAND.name}. All rights reserved.
+              </p>
+              <div className="flex items-center gap-3 text-white/30 text-xs">
+                <Link href="/privacy-policy" className="hover:text-white/60 transition-colors">Privacy</Link>
+                <span>·</span>
+                <Link href="/terms" className="hover:text-white/60 transition-colors">Terms</Link>
+                <span>·</span>
+                <Link href="/help" className="hover:text-white/60 transition-colors">Help</Link>
+              </div>
+            </div>
 
             {/* Payment icons */}
             <div className="flex items-center gap-2 flex-wrap justify-center order-1 sm:order-2">

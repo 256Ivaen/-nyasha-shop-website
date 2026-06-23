@@ -61,6 +61,15 @@ export const FOOTER_QUICK_SHOP = [
   { label: 'My Orders',     href: '/orders' },
 ] as const
 
+export const FOOTER_LEGAL = [
+  { label: 'Help & Support',  href: '/help' },
+  { label: 'Returns & Refunds', href: '/help#returns' },
+  { label: 'Delivery Info',   href: '/help#delivery' },
+  { label: 'Privacy Policy',  href: '/privacy-policy' },
+  { label: 'Terms & Conditions', href: '/terms' },
+  { label: 'FAQs',            href: '/faq' },
+] as const
+
 export const TRUST_BADGES = [
   { title: '100% Authentic',   desc: 'All fabrics and garments are genuine African print.' },
   { title: 'UK Fast Delivery', desc: 'Royal Mail delivery 2–4 working days across the UK.' },
